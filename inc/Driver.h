@@ -27,9 +27,21 @@ using namespace std;
 extern mutex th_mutex;
 using sd = class Driver {
 public:
+    vector<float>_driver_gearRatioScalar{vector<float>(8388608/360,servoNUMs)};
+public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
     auto servoDisable(std::vector<DTS> &SendData) -> int;
+    void setGearRatioScalar(initializer_list<float> r){
+        int i{};
+        for(auto scalar:r){
+            i++;
+            if(i>servoNUMs){
+                break;
+            }
+           _driver_gearRatioScalar[i-1]=scalar;
+        }
+    }
     /**
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
      */
@@ -50,6 +62,7 @@ public:
     int Disable();
     template<typename T,typename ...T2>
     int Write(T operationMode='0',T2...args ){
+        MotSendData = gearRatio_Scalar({args...});
         if (operationMode == '0') {
             // Normal motion with no sync-vec and no target change immediately
             int count{};
@@ -85,6 +98,7 @@ public:
     }
 
 private:
-    vector<DTS> MotSendData=vector<DTS>(servoNUMs);
-    vector<DFS> MotGetData=vector<DFS>(servoNUMs);
+    vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
+    vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
+    vector<DTS> &gearRatio_Scalar(initializer_list<float> args);
 };

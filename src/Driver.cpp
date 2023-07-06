@@ -229,8 +229,8 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         return error_code;
     }
 }
-int break_state[servoNUMs] = {};
 auto Driver::servoBreak(const bool &state) -> int {
+    int break_state[servoNUMs] = {};
     for (auto &b: break_state) {
         b = state == true;
     }
@@ -257,4 +257,12 @@ int MotionV1::Disable() {
     }
     return 0;
 }
-
+vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
+    char i{};
+    for(auto index=args.begin();index!=args.end()-1;index++,i++){
+        if(i>=servoNUMs)
+            return MotSendData;
+        MotSendData[i].Target_Pos=_driver_gearRatioScalar[i]*(*index);
+    }
+    return MotSendData;
+}

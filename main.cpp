@@ -17,10 +17,11 @@ int main() {
     pr1.detach();
     // build ptr for control actions
     MotionV1* ptr_dev = new MotionV1(ads);
+
     ptr_dev->Enable();
-    ptr_dev->Write('0',100000);
+    ptr_dev->Write('0',100.0);
     this_thread::sleep_for(chrono::seconds(3));
-    ptr_dev->Write('0',0);
+    ptr_dev->Write('0',0.0);
     this_thread::sleep_for(chrono::seconds(3));
     ptr_dev->Disable();
     //    system("pause");
