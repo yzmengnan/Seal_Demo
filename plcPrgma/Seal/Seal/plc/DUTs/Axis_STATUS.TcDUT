@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="Axis_STATUS" Id="{e788bffb-e787-443c-a036-674945f88cab}">
+    <Declaration><![CDATA[TYPE Axis_STATUS :
+STRUCT
+	Status : WORD;
+	Mode_of_Operation_disp:BYTE;
+	Actual_Position:DINT;
+	Actual_Velocity :DINT;
+	Following_error:DINT;
+	Actual_Torque:INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

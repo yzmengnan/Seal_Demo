@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="Axis_output" Id="{b9dc03e2-2d33-45ae-a5c2-bb8a1b3092f6}">
+    <Declaration><![CDATA[TYPE Axis_output :
+STRUCT
+	Control_Word AT%Q*:WORD;
+	Target_Position AT%Q*:DINT;
+	Profile_Velocity AT%Q*:UDINT;
+	Max_Velocity AT%Q*:UDINT;
+	Mode_of_Operation AT%Q* :BYTE:=1;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
