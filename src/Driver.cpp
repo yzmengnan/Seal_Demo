@@ -237,7 +237,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
 auto Driver::servoBreak(const bool &state) -> int {
     int break_state[servoNUMs] = {};
     for (auto &b: break_state) {
-        b = state == true;
+        b = state;
     }
     auto nErr = AdsSyncWriteReq(p_ads->pAddr, OUTPUT_BASE, BREAK_OFFSET, 4 * servoNUMs, break_state);
     if (nErr) {
@@ -267,7 +267,7 @@ vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
     for(auto index=args.begin();index!=args.end()-1;index++,i++){
         if(i>=servoNUMs)
             return MotSendData;
-        MotSendData[i].Target_Pos=_driver_gearRatioScalar[i]*(*index);
+        MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
     }
     return MotSendData;
 }
