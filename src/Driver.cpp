@@ -105,6 +105,7 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         }
         if (state == servoNUMs) {
             std::cout << "All Servos Operation enabled!" << std::endl;
+            this_thread::sleep_for(chrono::milliseconds(100));
             servoBreak(true);
             state = 0;
             return 0;
