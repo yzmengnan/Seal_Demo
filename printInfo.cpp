@@ -29,9 +29,6 @@ int main(int argc, char* argv[])
             break;
         }
         cout <<chBuf << endl;
-//        for(int i=0;i<BUFSIZE;i++){
-//            chBuf[i]=0;
-//        }
         Sleep(10);
     }
     cout << "finish reading!" << endl;
