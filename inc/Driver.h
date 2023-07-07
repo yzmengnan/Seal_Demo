@@ -19,6 +19,7 @@
 #include "myThreadfuc.h"
 #include <chrono>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <thread>
 #include <vector>
@@ -42,6 +43,10 @@ public:
            _driver_gearRatioScalar[i-1]=scalar;
         }
     }
+    int GetDataUpdate(vector<DFS>&GetData){
+       auto err = p_ads->get(GetData);
+       return err;
+    }
     /**
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
      */
@@ -62,27 +67,41 @@ public:
     int Disable();
     template<typename T,typename ...T2>
     int Write(T operationMode='0',T2...args ){
+       //update target position with gearRatio_Scalar anyway!
         MotSendData = gearRatio_Scalar({args...});
         if (operationMode == '0') {
             // Normal motion with no sync-vec and no target change immediately
-            int count{};
-            for (auto &x: {args...}) {
-                count++;
-                if (count > servoNUMs) {
-                    break;
-                } else
-                    this->MotSendData[count - 1].Target_Pos = x;
-            }
             int err = servoPP0(MotSendData,MotGetData);
             if(err<-1){
-                cout<<"MotionV0 : pp0 error"<<endl;
+                cout<<"MotionV1 : pp0 error"<<err<<endl;
                 return err;
             }
-        } else if (operationMode == '0') {
-            //motion with sync-vec
         } else if (operationMode == '1') {
-            //motion with target change immediately
+            //motion with sync-vec
+            //get the servo data
+            auto err = GetDataUpdate(MotGetData);
+            if(err<0){
+                cout<<"MotionV1 Write error! "<< err<<endl;
+                return err;
+            }
+            vector<uint32_t> Delta{};
+            for(int i=0;i<servoNUMs;i++){
+                Delta.push_back(abs(MotSendData[i].Target_Pos-MotGetData[i].Actual_Pos));
+            }
+            uint32_t maxDelta = *max_element(Delta.begin(),Delta.end());
+            //calculate and update each joint`s velocity
+            for(int vec_index=0;vec_index<servoNUMs;vec_index++){
+                MotSendData[vec_index].Profile_Velocity = sync_rpm*((float)(Delta[vec_index]/maxDelta));
+            }
+            err = servoPP0(MotSendData,MotGetData);
+            if(err<0){
+                cout<<"MotionV1 :pp1 error"<<err<<endl;
+                return err;
+            }
+
         } else if (operationMode == '2') {
+            //motion with target change immediately
+        } else if (operationMode == '3') {
             //motion with both sync-vec and target change immediately
         } else {
             cout << "wrong operation mode set!" << endl;
@@ -101,4 +120,5 @@ private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
     vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
     vector<DTS> &gearRatio_Scalar(initializer_list<float> args);
+    int sync_rpm{100};
 };

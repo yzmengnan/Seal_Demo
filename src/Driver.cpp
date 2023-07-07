@@ -190,13 +190,11 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         this_thread::sleep_for(chrono::milliseconds(20));
         *servoLag_flag = false;
     };
-    //    mt timer1;
-    //    std::thread th1(&mt::tc,timer1, servoLag_flag, 30);
-    //    th1.detach();
+
     thread th1(th);
     th1.detach();
     bool target_ack = true;
-    while (target_ack || *servoLag_flag) {
+    while (target_ack && *servoLag_flag) {
         int statusReadyCount = 0;
         // 获取伺服状态字
         // th_mutex.lock();
