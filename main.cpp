@@ -19,9 +19,9 @@ int main() {
     MotionV1* ptr_dev = new MotionV1(ads);
 
     ptr_dev->Enable();
-    ptr_dev->Write('0',100.0);
+    ptr_dev->Write('0',100.0f);
     this_thread::sleep_for(chrono::seconds(3));
-    ptr_dev->Write('0',0.0);
+    ptr_dev->Write('0',0.0f);
     this_thread::sleep_for(chrono::seconds(3));
     ptr_dev->Disable();
     //    system("pause");

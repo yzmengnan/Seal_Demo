@@ -53,7 +53,7 @@ void myThreadfuc::print_info(vector<DFS> &GetData, Tc_Ads &ads,const string& nam
     while (enableFlag) {
         auto servoData_success = ads.get(GetData);
         if(servoData_success<0){
-            cout<<"Ads error: "<<servoData_success<<endl;
+            cout<<"Get Monitor Data error! Ads error: "<<servoData_success<<endl;
             break;
         }
         string monitor_DATA{};

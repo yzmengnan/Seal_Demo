@@ -6,7 +6,6 @@
 #include"iostream"
 #include "DATA_STRUCT.h"
 #define BUFSIZE 4096
-#define readlen 25+servoNUMs*8+1
 using namespace std;
 
 int main(int argc, char* argv[])
