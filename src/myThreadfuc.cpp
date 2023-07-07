@@ -12,6 +12,7 @@
 #include <cmath>
 #include <iomanip>
 #include <sstream>
+#include <windows.h>
 mutex th_mutex;
 void mt::tc(shared_ptr<bool> flag, int breakout_value) {
     // std::cout << "Timer counting" << std::endl;
@@ -54,7 +55,7 @@ void myThreadfuc::print_info(vector<DFS> &GetData, Tc_Ads &ads,const string& nam
         auto servoData_success = ads.get(GetData);
         if(servoData_success<0){
             cout<<"Get Monitor Data error! Ads error: "<<servoData_success<<endl;
-            break;
+            ExitProcess(1);
         }
         string monitor_DATA{};
 
@@ -71,9 +72,8 @@ void myThreadfuc::print_info(vector<DFS> &GetData, Tc_Ads &ads,const string& nam
 
         monitor_DATA = "[ "+string{strTime}+" ]";
         auto fadd_space=[](int16_t data){
-//            data=3050;
             auto str=[](int16_t data){
-                string ss = to_string((float)data/0xffff*1.21);
+                string ss = to_string((double)data/0x7fff*1.21*0.001);
                 return ss.substr(0,ss.find(".")+4);
             };
             string s2=str(data);
