@@ -109,12 +109,6 @@ public:
         }
         return -1;
     }
-    vector<DTS> &get_DrvSendData() {
-        return MotSendData;
-    }
-    vector<DFS> &get_DrvGetData() {
-        return MotGetData;
-    }
 
 private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
