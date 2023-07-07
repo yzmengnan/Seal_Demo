@@ -228,6 +228,12 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         return error_code;
     }
 }
+
+/*!
+ * @disription false meaning lock drivers
+ * @param state
+ * @return 0 if set success
+ */
 auto Driver::servoBreak(const bool &state) -> int {
     int break_state[servoNUMs] = {};
     for (auto &b: break_state) {
