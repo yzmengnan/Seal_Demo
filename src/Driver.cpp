@@ -264,7 +264,7 @@ int MotionV1::Disable() {
 }
 vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
     char i{};
-    for(auto index=args.begin();index!=args.end()-1;index++,i++){
+    for(auto index=args.begin();index!=args.end();index++,i++){
         if(i>=servoNUMs)
             return MotSendData;
         MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
