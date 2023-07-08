@@ -2,8 +2,10 @@
 #include "vector"
 #include "Multi_Process.h"
 using namespace std;
-
+void test();
 int main() {
+    //test
+    test();
     //build variables
     Tc_Ads ads;
     vector<DTS> sendData(servoNUMs);
@@ -24,4 +26,10 @@ int main() {
     this_thread::sleep_for(chrono::seconds(3));
     ptr_dev->Disable();
     return 0;
+}
+void test(){
+   Tc_Ads ads;
+   auto ptr_dev = make_shared<MotionV1>(ads);
+   ptr_dev->setGearRatioScalar({2304.5});
+   ptr_dev->Write('1',90.0f);
 }
