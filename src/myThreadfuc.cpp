@@ -9,10 +9,7 @@
  * Copyright (c) 2023 by YangQ, All Rights Reserved.
  */
 #include "myThreadfuc.h"
-#include <cmath>
-#include <iomanip>
 #include <sstream>
-#include <windows.h>
 mutex th_mutex;
 void mt::tc(shared_ptr<bool> flag, int breakout_value) {
     // std::cout << "Timer counting" << std::endl;
@@ -47,6 +44,7 @@ void myThreadfuc::print_info(vector<DFS> &GetData, Tc_Ads &ads,const string& nam
     Multi_Process p;
     if(p.monitor(name,handle_read)!=0){
         enableFlag=false;
+        cout<<"监视进程创建失败！"<<endl;
     }
     this_thread::sleep_for(chrono::seconds(2));
     cout<<"监视器开启！"<<endl;
