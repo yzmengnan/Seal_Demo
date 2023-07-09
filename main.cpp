@@ -1,6 +1,7 @@
 #include "Driver.h"
 #include "vector"
 #include "Multi_Process.h"
+#include "motionDataTransform.hpp"
 using namespace std;
 void test();
 int main() {
@@ -30,6 +31,18 @@ int main() {
 void test(){
    Tc_Ads ads;
    auto ptr_dev = make_shared<MotionV1>(ads);
-   ptr_dev->setGearRatioScalar({2304.5});
    ptr_dev->Write('1',90.0f);
+   vector<DFS> getData(servoNUMs);
+   auto data = mdt::getAngles(*ptr_dev,getData);
+   for(auto d:data){
+       cout<<"ratio: "<<d<<",";
+   }
+    ptr_dev->setGearRatioScalar({2304.5});
+    data = mdt::getAngles(*ptr_dev,getData);
+    for(auto d:data){
+       cout<<"ratio: "<<d<<",";
+   }
+   cout<<endl;
+   ExitProcess(1);
+
 }
