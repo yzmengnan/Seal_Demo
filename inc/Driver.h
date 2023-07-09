@@ -23,7 +23,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-
 using namespace std;
 extern mutex th_mutex;
 using sd = class Driver {
