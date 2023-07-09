@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "motionDataTransform.hpp"
 Driver::Driver(Tc_Ads &ads_handle) {
     p_ads = &ads_handle;
 }
@@ -263,11 +264,14 @@ int MotionV1::Disable() {
     return 0;
 }
 vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
-    char i{};
-    for(auto index=args.begin();index!=args.end();index++,i++){
-        if(i>=servoNUMs)
-            return MotSendData;
-        MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
-    }
+//    char i{};
+//    vector<float> angles;
+//    for(auto index=args.begin();index!=args.end();index++,i++){
+//        if(i>=servoNUMs)
+//            return MotSendData;
+//        MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
+//        angles.push_back(*index);
+//    }
+    mdt::fromAnglesToPulses(*this,vector<float>{args},this->MotSendData);
     return MotSendData;
 }
