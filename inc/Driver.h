@@ -28,7 +28,7 @@ using namespace std;
 extern mutex th_mutex;
 using sd = class Driver {
 public:
-    vector<float>_driver_gearRatioScalar{vector<float>(8388608/360,servoNUMs)};
+    vector<float>_driver_gearRatioScalar{vector<float>(servoNUMs,8388608/360)};
 public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
@@ -45,7 +45,10 @@ public:
     }
     int GetDataUpdate(vector<DFS>&GetData){
        auto err = p_ads->get(GetData);
-       return err;
+       if(err<0){
+           cout<<"Get Data Update error :"<<err<<endl;
+       }
+       return 0;
     }
     /**
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
