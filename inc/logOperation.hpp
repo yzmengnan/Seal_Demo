@@ -7,31 +7,81 @@
 #include "DATA_STRUCT.h"
 #include "motionDataTransform.hpp"
 #include <cstdint>
+#include <sstream>
 #include <vector>
 using namespace std;
 using file_log = class logOperation {
 public:
-    static void writeFile(const vector<DFS> &getData) {
-        vector<float> angle_K{};
-        vector<float> moment_K{};
-        vector<int32_t> velocity_K{};
-        for (auto gdata = getData.begin(); gdata != getData.end(); gdata++) {
-            auto m = [](int32_t data) {
-                return (float) (data / 8388608 * 1.21 / 1000);
-            };
-            auto s = [](int32_t data) {
-                return (float) (data / 8388608 * 360);
-            };
-            angle_K.push_back(s(gdata->Actual_Pos));
-            moment_K.push_back(m(gdata->Actual_Torque));
-            velocity_K.push_back(gdata->Actual_Vec);
+
+    void finishWrite(){
+        cout<<"finish record!"<<endl;
+
+        this->writeEnable=false;
+    }
+    void writeFile(Driver d) {
+        vector<DFS> getData(servoNUMs);
+        SYSTEMTIME systime={0};
+        GetSystemTime(&systime);
+        stringstream file_name;
+        file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"<<systime.wHour<<"-"<<systime.wMinute;
+        fstream fp,fv,fm;
+        string file_position = file_name.str()+" angles";
+        string file_vec = file_name.str()+" vecs";
+        string file_moments = file_name.str()+" moments";
+        fp.open(file_position,ios::out);
+        fv.open(file_vec,ios::out);
+        fm.open(file_moments,ios::out);
+        int index{};
+        if(writeEnable){
+            cout<<"start data record!"<<endl;
         }
+        while(writeEnable) {
+            auto err = d.GetDataUpdate(getData);
+            if (err < 0) {
+                cout << "log operation err!" << err << endl;
+                break;
+            }
+
+            {
+                stringstream data;
+                data << index;
+                for (auto d: MDT::getAngles(d, getData)) {
+                    data<< " " << d;
+                }
+                fp<<data.str()<<endl;
+            }
+            {
+                stringstream data;
+                data << index;
+                for (auto d: MDT::getVecs(d, getData)) {
+                    data << " " << d;
+                }
+                fv<<data.str()<<endl;
+            }
+            {
+                stringstream data;
+                data << index;
+                for (auto d: MDT::getAngles(d, getData)) {
+                    data << " " << d;
+                }
+                fm<<data.str()<<endl;
+            }
+            index++;
+            this_thread::sleep_for(chrono::milliseconds(10));
+        }
+        fp.close();
+        fv.close();
+        fm.close();
+    }
+    virtual ~logOperation() {
+        finishWrite();
     }
 
 private:
     vector<vector<float>> _angles{};
     vector<vector<float>> _moments{};
-    vector<vector<int32_t>> _velocities{};
+    vector<vector<float>> _velocities{};
+    bool writeEnable=true;
 };
 
 
