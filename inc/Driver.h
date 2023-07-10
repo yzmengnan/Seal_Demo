@@ -43,7 +43,9 @@ public:
         }
     }
     int GetDataUpdate(vector<DFS>&GetData){
+       th_mutex.lock();
        auto err = p_ads->get(GetData);
+       th_mutex.unlock();
        if(err<0){
            cout<<"Get Data Update error :"<<err<<endl;
        }
@@ -53,6 +55,7 @@ public:
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
      */
     auto servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
+    virtual ~Driver();
 
 private:
     auto servoBreak(const bool &state) -> int;
@@ -111,6 +114,7 @@ public:
         }
         return -1;
     }
+    virtual ~MotionV1();
 
 private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
