@@ -3,12 +3,12 @@
  * @Date: 2023-02-28 16:43:54
  * @LastEditors: YangQ
  * @LastEditTime: 2023-03-08 11:10:46
- * @FilePath: \Demo0\SRC\myThreadfuc.cpp
+ * @FilePath: \Demo0\SRC\MONITOR.cpp
  * @Description:
  *
  * Copyright (c) 2023 by YangQ, All Rights Reserved.
  */
-#include "myThreadfuc.h"
+#include "MONITOR.h"
 #include <sstream>
 mutex th_mutex;
 void mt::tc(shared_ptr<bool> flag, int breakout_value) {
@@ -16,8 +16,9 @@ void mt::tc(shared_ptr<bool> flag, int breakout_value) {
     std::this_thread::sleep_for(std::chrono::milliseconds(breakout_value));
     *flag = false;
 }
-void myThreadfuc::print_info(vector<DFS> &GetData, Tc_Ads &ads,const string& name) {
+void MONITOR::print_info(Tc_Ads &ads,const string& name) {
     bool enableFlag=true;
+    vector<DFS>GetData(servoNUMs);
     SetConsoleOutputCP(CP_UTF8);
     cout<<"创建管道！"<<endl;
     SECURITY_ATTRIBUTES saAttr;

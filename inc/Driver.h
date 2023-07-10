@@ -13,10 +13,10 @@
 
 #include "DATA_STRUCT.h"
 #include "Data_Record.h"
+#include "MONITOR.h"
 #include "Tc_Ads.h"
 #include "TimerCounter.h"
 #include "jointDataProcess.h"
-#include "myThreadfuc.h"
 #include <chrono>
 #include <iostream>
 #include <numeric>

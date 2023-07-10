@@ -25,9 +25,10 @@ public:
         stringstream file_name;
         file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"<<systime.wHour<<"-"<<systime.wMinute;
         fstream fp,fv,fm;
-        string file_position = file_name.str()+" angles";
-        string file_vec = file_name.str()+" vecs";
-        string file_moments = file_name.str()+" moments";
+        string file_address="../data/";
+        string file_position = file_address+file_name.str()+" angles";
+        string file_vec =file_address+file_name.str()+" vecs";
+        string file_moments = file_address+file_name.str()+" moments";
         fp.open(file_position,ios::out);
         fv.open(file_vec,ios::out);
         fm.open(file_moments,ios::out);
