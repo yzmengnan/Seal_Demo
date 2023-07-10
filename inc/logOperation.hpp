@@ -61,7 +61,7 @@ public:
             {
                 stringstream data;
                 data << index;
-                for (auto d: MDT::getAngles(d, getData)) {
+                for (auto d: MDT::getMoments(d, getData)) {
                     data << " " << d;
                 }
                 fm<<data.str()<<endl;
