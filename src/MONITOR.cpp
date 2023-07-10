@@ -72,6 +72,7 @@ void MONITOR::print_info(Tc_Ads &ads,const string& name) {
         monitor_DATA = "[ "+string{strTime}+" ]";
         auto fadd_space=[](int16_t data){
             auto str=[](int16_t data){
+                //如何引入motionDataTransform?
                 string ss = to_string((double)data/0x7fff*1.21*0.001);
                 return ss.substr(0,ss.find(".")+4);
             };
