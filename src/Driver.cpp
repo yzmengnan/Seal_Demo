@@ -269,15 +269,14 @@ int MotionV1::Disable() {
     return 0;
 }
 vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
-//    char i{};
-//    vector<float> angles;
-//    for(auto index=args.begin();index!=args.end();index++,i++){
-//        if(i>=servoNUMs)
-//            return MotSendData;
-//        MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
-//        angles.push_back(*index);
-//    }
-    MDT::fromAnglesToPulses(*this,vector<float>{args},this->MotSendData);
+    char i{};
+    vector<float> angles;
+    for(auto index=args.begin();index!=args.end();index++,i++){
+        if(i>=servoNUMs)
+            return MotSendData;
+        angles.push_back(*index);
+    }
+    MDT::fromAnglesToPulses(*this,angles,this->MotSendData);
     return MotSendData;
 }
 MotionV1::~MotionV1() {
