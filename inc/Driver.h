@@ -32,6 +32,16 @@ public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
     auto servoDisable(std::vector<DTS> &SendData) -> int;
+    void setProfileVelocity(vector<float> degreesPerSeconds,std::vector<DTS> &SendData){
+        int i{};
+        for(auto& s:SendData){
+            if(i>=degreesPerSeconds.size()){
+                break;
+            }
+            s.Profile_Velocity=degreesPerSeconds[i]*this->_driver_gearRatioScalar[i];
+            i++;
+        }
+    }
     void setGearRatioScalar(initializer_list<float> r){
         int i{};
         for(auto scalar:r){
@@ -48,6 +58,7 @@ public:
        th_mutex.unlock();
        if(err<0){
            cout<<"Get Data Update error :"<<err<<endl;
+           return err;
        }
        return 0;
     }
@@ -113,6 +124,14 @@ public:
             return -2;
         }
         return -1;
+    }
+    template<typename...T>
+    void setProfileVelocity(T...args){
+        vector<float> dps;
+        for(auto dps_k:{args...}){
+            dps.push_back(dps_k);
+        }
+        this->Driver::setProfileVelocity(dps,this->MotSendData);
     }
     virtual ~MotionV1();
 
