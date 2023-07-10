@@ -5,7 +5,7 @@
 #include "logOperation.hpp"
 using namespace std;
 void test();
-#define TEST
+//#define TEST
 int main() {
 #ifdef TEST
     //test
@@ -13,22 +13,28 @@ int main() {
 #endif
 #ifndef TEST
     //build variables
-    Tc_Ads ads;
-    vector<DTS> sendData(servoNUMs);
-    vector<DFS> getData(servoNUMs);
-    Multi_Process p;
-    mt thread1;
+    Tc_Ads ads;                                 //ads handle
+    Multi_Process p;                            //safety care class
+    mt thread1;                                 // monitor class
+    file_log ff;                                // file record
+    MotionV1* ptr_dev = new MotionV1(ads); //controller ptr
+
     // add safety program
     p.safety_monitor_build("safe_program.exe");
-    // add background thread to record information
-    thread pr1(&mt::print_info,thread1, ref(getData), ref(ads),"printinfo.exe");
-    pr1.detach();
-    // build ptr for control actions
-    MotionV1* ptr_dev = new MotionV1(ads);
+
+    // add background thread to print information
+    thread pr(&mt::print_info,thread1 , ref(ads),"printinfo.exe");
+    pr.detach();
+
+    //add background thread to record servo data
+    thread rd(&file_log::writeFile,ff,*ptr_dev);
+    rd.detach();
+
+    //main actions!
     ptr_dev->Enable();
     ptr_dev->Write('0',100.0f);
     this_thread::sleep_for(chrono::seconds(3));
-    ptr_dev->Write('0',0.0f);
+    ptr_dev->Write('1',0.0f);
     this_thread::sleep_for(chrono::seconds(3));
     ptr_dev->Disable();
     return 0;
