@@ -16,6 +16,11 @@
 Driver::Driver(Tc_Ads &ads_handle) {
     p_ads = &ads_handle;
 }
+Driver::~Driver() {
+    vector<DTS> sendData(servoNUMs);
+    servoDisable(sendData);
+    cout<<"Driver controller disable!"<<endl;
+}
 auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int {
     for (int try_count = 0; try_count < 3; try_count++) {
         uint8_t state = 0;
@@ -272,6 +277,10 @@ vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
 //        MotSendData[i].Target_Pos=(int32_t)(_driver_gearRatioScalar[i]*(*index));
 //        angles.push_back(*index);
 //    }
-    mdt::fromAnglesToPulses(*this,vector<float>{args},this->MotSendData);
+    MDT::fromAnglesToPulses(*this,vector<float>{args},this->MotSendData);
     return MotSendData;
+}
+MotionV1::~MotionV1() {
+    this->Disable();
+    cout<<"Motion V1 controller disable!"<<endl;
 }
