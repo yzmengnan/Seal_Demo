@@ -10,7 +10,9 @@
  */
 #include "Driver.h"
 #include <algorithm>
+#include <chrono>
 #include <memory>
+#include <thread>
 
 #include "motionDataTransform.hpp"
 Driver::Driver(Tc_Ads &ads_handle) {
@@ -19,7 +21,7 @@ Driver::Driver(Tc_Ads &ads_handle) {
 Driver::~Driver() {
     vector<DTS> sendData(servoNUMs);
     servoDisable(sendData);
-    cout<<"Driver controller disable!"<<endl;
+    cout << "Driver controller disable!" << endl;
 }
 auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int {
     for (int try_count = 0; try_count < 3; try_count++) {
@@ -27,13 +29,16 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         error_code = p_ads->get(GetData);
         Sleep(10);
         //first check ,if servo is enabled, quit!
-        for(auto child:GetData){
-           state+=child.Status_Word&=0x37==0x37;
+        for (auto child: GetData) {
+            state += child.Status_Word &= 0x37 == 0x37;
         }
-        if(state==servoNUMs){
-           cout<<"All servo has been enabled!"<<endl;
-           state=0;
-           return 0;
+        if (state == servoNUMs) {
+            cout << "All servo has been enabled!" << endl;
+            for(auto& child:SendData){
+                child.Control_Word|=0x000f;
+            }
+            state = 0;
+            return 0;
         }
         if (error_code < 0) {
             cout << "SERVO ENABLE: Get Data Error:" << error_code << endl;
@@ -103,8 +108,8 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
             cout << "SERVO ENABLE: Set Data Error:" << error_code << endl;
         }
         error_code = p_ads->get(GetData);
-        if(error_code<0){
-            cout<<"SERVO ENABLE: Get Data Error: "<<error_code<<endl;
+        if (error_code < 0) {
+            cout << "SERVO ENABLE: Get Data Error: " << error_code << endl;
         }
         for (DFS child_servo: GetData) {
             state += ((child_servo.Status_Word &= 0x37) == 0x37);
@@ -203,7 +208,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
     while (target_ack && *servoLag_flag) {
         int statusReadyCount = 0;
         // 获取伺服状态字
-        // th_mutex.lock();
+         th_mutex.lock();
         error_code = p_ads->get(GetData);
         th_mutex.unlock();
         if (error_code) {
@@ -253,6 +258,20 @@ auto Driver::servoBreak(const bool &state) -> int {
 }
 MotionV1::MotionV1(Tc_Ads &ads_handle) : Driver(ads_handle) {
     cout << "MotionV1 control module built!" << endl;
+    auto dataUpdating_MOTIONV1 = [&]() {
+        while (true) {
+            auto err = this->GetDataUpdate(MotGetData);
+            if(err<0){
+                cout<<"Error updating servo data error in MotionV1 "<<err<<endl;
+                break;
+            }
+            this_thread::sleep_for(chrono::milliseconds(10));
+       }
+    };
+    thread t(dataUpdating_MOTIONV1);
+    t.detach();
+    cout<<"MotionV1 is updating the servo data background!"<<endl;
+
 }
 int MotionV1::Enable() {
     auto err = servoEnable(MotSendData, MotGetData);
