@@ -8,6 +8,7 @@
 #include "motionDataTransform.hpp"
 #include <cstdint>
 #include <sstream>
+#include <thread>
 #include <vector>
 using namespace std;
 using file_log = class logOperation {
@@ -23,7 +24,7 @@ public:
         SYSTEMTIME systime={0};
         GetSystemTime(&systime);
         stringstream file_name;
-        file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"<<systime.wHour<<"-"<<systime.wMinute;
+        file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"<<(systime.wHour+8)/24+1<<"-"<<systime.wMinute;
         fstream fp,fv,fm;
         string file_address="../data/";
         string file_position = file_address+file_name.str()+" angles";
@@ -37,12 +38,14 @@ public:
             cout<<"start data record!"<<endl;
         }
         while(writeEnable) {
-            auto err = d.GetDataUpdate(getData);
-            if (err < 0) {
-                cout << "log operation err!" << err << endl;
-                break;
-            }
-
+            //伺服器类内部有私有getData成员，后台线程持续刷新
+            //getData为保护内容，不设置对外访问权限，即驱动函数类内优先级最高。
+            //其他线程需要访问getData时，执行主动请求，且设置线程锁。
+                auto err = d.GetDataUpdate(getData);
+                if (err < 0) {
+                    cout << "log operation err!" << err << endl;
+                    break;
+                }
             {
                 stringstream data;
                 data << index;
@@ -68,7 +71,7 @@ public:
                 fm<<data.str()<<endl;
             }
             index++;
-            this_thread::sleep_for(chrono::milliseconds(10));
+            this_thread::sleep_for(chrono::milliseconds(20));
         }
         fp.close();
         fv.close();
