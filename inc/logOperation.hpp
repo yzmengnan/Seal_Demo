@@ -24,7 +24,9 @@ public:
         SYSTEMTIME systime={0};
         GetSystemTime(&systime);
         stringstream file_name;
-        file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"<<(systime.wHour+8)/24+1<<"-"<<systime.wMinute;
+        file_name<<systime.wMonth<<"-"<<systime.wDay<<"-"
+                  <<((systime.wHour+8)>24?(systime.wHour+8/24)+1:systime.wHour+8)
+                  <<"-"<<systime.wMinute;
         fstream fp,fv,fm;
         string file_address="../data/";
         string file_position = file_address+file_name.str()+" angles";
