@@ -14,7 +14,7 @@ public:
     }
     PROCESS_INFORMATION safety_monitor_build(const string& name);
     PROCESS_INFORMATION safety_monitor_build();
-    void processDelete(PROCESS_INFORMATION& pi);
+    int processDelete(PROCESS_INFORMATION& pi);
     int monitor(const string& name,HANDLE&handle_read);
 private:
     string safety_program = "SAFE_CHECK.exe";
