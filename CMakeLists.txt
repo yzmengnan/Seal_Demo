@@ -8,11 +8,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 add_library(Tc_Adslib src/Tc_Ads.cpp)
 add_library(driverlib src/Driver.cpp)
-add_library(mtlib src/myThreadfuc.cpp)
+add_library(mtlib src/MONITOR.cpp)
 add_library(dplib src/jointDataProcess.cpp)
 add_library(datarecordlib src/Data_Record.cpp)
 add_library(timecountlib src/TimerCounter.cpp)
 add_library(MultiProcesslib src/Multi_Process.cpp)
+
+
+
 
 add_executable(Seal_Demo main.cpp )
 add_executable(safe_program safeCheck.cpp)
