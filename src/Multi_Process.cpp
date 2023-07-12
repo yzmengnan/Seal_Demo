@@ -3,6 +3,7 @@
 //
 
 #include "Multi_Process.h"
+#include <processthreadsapi.h>
 PROCESS_INFORMATION Multi_Process::safety_monitor_build() {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -11,7 +12,7 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build() {
     ZeroMemory(&pi, sizeof(pi));
     // Start the child process.
     if (!CreateProcess(NULL,                                                                 // No module name (use command line)
-                       safety_program.data(),                                                     // Command line
+                       safety_program.data(),                                                // Command line
                        NULL,                                                                 // Process handle not inheritable
                        NULL,                                                                 // Thread handle not inheritable
                        FALSE,                                                                // Set handle inheritance to FALSE
@@ -25,15 +26,14 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build() {
         return pi;
     }
 
-    // Wait until child process exits.
-    //    WaitForSingleObject( pi.hProcess, INFINITE );
-    processDelete(pi);
+//    processDelete(pi);
     return pi;
 }
-void Multi_Process::processDelete(PROCESS_INFORMATION &pi) {
+int Multi_Process::processDelete(PROCESS_INFORMATION &pi) {
     // Close process and thread handles.
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    //    CloseHandle(pi.hProcess);
+    //    CloseHandle(pi.hThread);
+    return (TerminateProcess(pi.hProcess,0));
 }
 PROCESS_INFORMATION Multi_Process::safety_monitor_build(const string& name) {
     STARTUPINFO si;
@@ -58,10 +58,6 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build(const string& name) {
         return pi;
     }
     cout<<"SAFETY PROCESS START!"<<endl;
-
-    // Wait until child process exits.
-    //    WaitForSingleObject( pi.hProcess, INFINITE );
-    processDelete(pi);
     return pi;
 }
 int Multi_Process::monitor(const string& name,HANDLE&handle_read) {
@@ -92,7 +88,7 @@ int Multi_Process::monitor(const string& name,HANDLE&handle_read) {
     }
     else{
         cout<<"monitor进程创建成功！ "<<endl;
-        processDelete(pi);
+//        processDelete(pi);
     }
     return 0;
 }
