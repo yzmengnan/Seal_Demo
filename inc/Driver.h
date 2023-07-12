@@ -73,6 +73,13 @@ public:
     auto servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
     virtual ~Driver();
 
+
+
+    //Test part
+    void TestBREAK(const bool& state){
+       servoBreak(state);
+    }
+
 private:
     auto servoBreak(const bool &state) -> int;
     bool pp_Flag = 0;//=1表示pp就位，=0表示未就位
@@ -87,6 +94,22 @@ public:
     int Enable();
     int Disable();
     template<typename T,typename ...T2>
+    /*!
+     *
+     * @tparam T
+     * @tparam T2
+     * @param operationMode  '0': 此状态下，执行有缓冲的Profile运动，当前位置执行中，新的位置发送时，
+     *                          新的位置作为缓存进入伺服器的缓存器中，当前位置执行结束后，立即执行有效的缓存器内的动作
+     *                       '1': 此状态下，执行各轴同步速度的'0'
+     *                       '2': 此状态下，执行无缓冲的Profile运动，当前位置执行中，新的位置发送时，
+     *                          立即运行到新的位置。
+     *                       '3': 此状态下，执行各轴同步速度的'2'
+     *
+     *                        请使用setSyncrpm函数调整同步速度大小
+     *
+     * @param args
+     * @return
+     */
     int Write(T operationMode='0',T2...args ){
        //update target position with gearRatio_Scalar anyway!
         MotSendData = gearRatio_Scalar({args...});
@@ -141,6 +164,9 @@ public:
         this->Driver::setProfileVelocity(dps,this->MotSendData);
     }
     virtual ~MotionV1();
+    void setSyncrpm(int rpm){
+        this->sync_rpm = rpm;
+    }
 
 private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
