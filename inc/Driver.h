@@ -27,19 +27,24 @@ using namespace std;
 extern mutex th_mutex;
 using sd = class Driver {
 public:
-    vector<float>_driver_gearRatioScalar{vector<float>(servoNUMs,8388608/360)};
+    vector<float> _driver_gearRatioScalar{vector<float>(servoNUMs, 8388608 / 360)};
+
 public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
     auto servoDisable(std::vector<DTS> &SendData) -> int;
-    void setProfileVelocity(vector<float> degreesPerSeconds,std::vector<DTS> &SendData){
+    void setProfileVelocity(vector<float> degreesPerSeconds, std::vector<DTS> &SendData) {
         int i{};
-        for(auto& s:SendData){
-            if(i>=degreesPerSeconds.size()){
+        for (auto &s: SendData) {
+            if (i >= degreesPerSeconds.size()) {
                 break;
             }
-            s.Profile_Velocity=degreesPerSeconds[i]*this->_driver_gearRatioScalar[i];
+            s.Profile_Velocity = degreesPerSeconds[i] * this->_driver_gearRatioScalar[i];
             i++;
+        }
+        int err = p_ads->set(SendData);
+        if(err<0){
+            cout<<"set profile velocity error!"<<err<<endl;
         }
     }
     void setGearRatioScalar(initializer_list<float> r){
@@ -95,11 +100,12 @@ public:
         } else if (operationMode == '1') {
             //motion with sync-vec
             //get the servo data
-            auto err = GetDataUpdate(MotGetData);
-            if(err<0){
-                cout<<"MotionV1 Write error! "<< err<<endl;
-                return err;
-            }
+            //canceled since the data is updating background
+//            auto err = GetDataUpdate(MotGetData);
+//            if(err<0){
+//                cout<<"MotionV1 Write error! "<< err<<endl;
+//                return err;
+//            }
             vector<uint32_t> Delta{};
             for(int i=0;i<servoNUMs;i++){
                 Delta.push_back(abs(MotSendData[i].Target_Pos-MotGetData[i].Actual_Pos));
@@ -107,9 +113,10 @@ public:
             uint32_t maxDelta = *max_element(Delta.begin(),Delta.end());
             //calculate and update each joint`s velocity
             for(int vec_index=0;vec_index<servoNUMs;vec_index++){
-                MotSendData[vec_index].Profile_Velocity = sync_rpm*((float)(Delta[vec_index]/maxDelta));
+                MotSendData[vec_index].Profile_Velocity = sync_rpm*((float)(Delta[vec_index]/maxDelta))
+                                                          *this->_driver_gearRatioScalar[vec_index];
             }
-            err = servoPP0(MotSendData,MotGetData);
+            auto err = servoPP0(MotSendData,MotGetData);
             if(err<0){
                 cout<<"MotionV1 :pp1 error"<<err<<endl;
                 return err;
