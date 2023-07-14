@@ -25,7 +25,7 @@ int main() {
     auto pi = p.safety_monitor_build("safe_program.exe");
 
     // add background thread to print information
-    thread pr(&mt::print_info, thread1, ref(ads), "printinfo.exe");
+    thread pr(&mt::print_info, thread1, *ptr_dev, "printinfo.exe");
     pr.detach();
 
     //add background thread to record servo data
@@ -35,14 +35,13 @@ int main() {
 
     //main actions!
     ptr_dev->Enable();
-    ptr_dev->setProfileVelocity(300.3f);
+    ptr_dev->setProfileVelocity(30000.3f);
     ptr_dev->Write('0', 1000.0f);
-    this_thread::sleep_for(chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(10));
     ptr_dev->setSyncrpm(1000);
     ptr_dev->Write('1', 0.0f);
     this_thread::sleep_for(chrono::seconds(1));
     ptr_dev->Disable();
-
 
     //kill safety process
     if (!(p.processDelete(pi))) {

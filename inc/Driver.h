@@ -1,14 +1,6 @@
 /*
- * @Author: YangQ
- * @Date: 2023-02-27 15:24:59
- * @LastEditors: YangQ
- * @LastEditTime: 2023-03-08 21:37:30
- * @FilePath: \Demo0\INC\Servo_Driver.h
- * @Description:
  *
- * Copyright (c) 2023 by YangQ, All Rights Reserved.
  */
-
 #pragma once
 
 #include "DATA_STRUCT.h"
@@ -19,6 +11,7 @@
 #include "jointDataProcess.h"
 #include <chrono>
 #include <iostream>
+#include <mutex>
 #include <numeric>
 #include <string>
 #include <thread>
@@ -137,7 +130,7 @@ public:
             //calculate and update each joint`s velocity
             for(int vec_index=0;vec_index<servoNUMs;vec_index++){
                 MotSendData[vec_index].Profile_Velocity = sync_rpm*((float)(Delta[vec_index]/maxDelta))
-                                                          *this->_driver_gearRatioScalar[vec_index];
+                                                          *this->_driver_gearRatioScalar[vec_index]*6;
             }
             auto err = servoPP0(MotSendData,MotGetData);
             if(err<0){
@@ -164,8 +157,20 @@ public:
         this->Driver::setProfileVelocity(dps,this->MotSendData);
     }
     virtual ~MotionV1();
+    /*!
+     * @Description 注意，设置同步速度时，考虑不同轴减速比不同，无法定义同步转速，
+     *              因此选取单位为rpm，表达最高轴的伺服轴输出转速
+     * @param rpm
+     */
     void setSyncrpm(int rpm){
         this->sync_rpm = rpm;
+    }
+    /*!
+     * @details 返回MotionV1内部的发送数据
+     * @return
+     */
+    vector<DTS> getSendData(){
+        return this->MotSendData;
     }
 
 private:
