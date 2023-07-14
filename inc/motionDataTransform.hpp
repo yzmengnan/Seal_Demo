@@ -31,7 +31,7 @@ public:
     static vector<float>getMoments(Driver& d,const vector<DFS>&getData){
        vector<float> result{};
        for(auto g:getData){
-            result.push_back(g.Actual_Torque/16383*1.21/1000);
+            result.push_back(g.Actual_Torque*1.21/1000);
        }
        return result;
     }
