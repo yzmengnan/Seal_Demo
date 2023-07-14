@@ -12,7 +12,7 @@
 
 #include <Windows.h>
 
-#define DTS_SIZE 20
+#define DTS_SIZE 22
 #define DFS_SIZE 20
 #define servoNUMs 1
 
@@ -22,6 +22,8 @@ using DTS = struct Data_To_Servo {
     UINT32 Profile_Velocity = 0x0fffffff;
     UINT32 Max_Velocity = 3000; // rpm
     INT8 Mode_of_Operation = 1;
+    INT16 Target_Torque = 0;
+    UINT16 Max_Torque = 1500;
 };
 using pDTS = DTS *;
 
