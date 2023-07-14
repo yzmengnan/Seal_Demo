@@ -13,8 +13,8 @@
 #include <chrono>
 #include <memory>
 #include <thread>
-
 #include "motionDataTransform.hpp"
+mutex th_mutex;
 Driver::Driver(Tc_Ads &ads_handle) {
     p_ads = &ads_handle;
 }
@@ -265,7 +265,7 @@ MotionV1::MotionV1(Tc_Ads &ads_handle) : Driver(ads_handle) {
                 cout<<"Error updating servo data error in MotionV1 "<<err<<endl;
                 break;
             }
-            this_thread::sleep_for(chrono::milliseconds(10));
+            this_thread::sleep_for(chrono::milliseconds(1));
        }
     };
     thread t(dataUpdating_MOTIONV1);
