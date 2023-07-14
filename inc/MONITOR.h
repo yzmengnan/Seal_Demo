@@ -17,19 +17,17 @@
 #include "Tc_Ads.h"
 #include "jointDataProcess.h"
 #include <chrono>
-#include <cstring>
 #include <iostream>
-#include <mutex>
 #include <thread>
 #include <vector>
 #include<memory>
 #include "Multi_Process.h"
+#include "Driver.h"
+class Driver;
 using namespace std;
-extern mutex th_mutex;
 using mt = class MONITOR {
 public:
-    void tc(shared_ptr<bool> flag, int breakout_value);
-    void print_info(Tc_Ads &ads,const string& name);
+    void print_info(Driver d,const string& name);
 private:
     int error_code = 0;
 };
