@@ -119,6 +119,7 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
             this_thread::sleep_for(chrono::milliseconds(120));
             servoBreak(true);
             state = 0;
+            enableFlag = true;
             return 0;
         } else {
             std::cout << "Servo Enable trying, time_counts:" << try_count + 1 << std::endl;
@@ -132,7 +133,7 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
 }
 
 auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
-    if(*cyclicFlag){
+    if (*cyclicFlag) {
         this->servoFinishCS();
     }
     servoBreak(false);
@@ -148,13 +149,19 @@ auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
         return error_code;
     }
     std::cout << "All Servos Operation disabled!" << std::endl;
+    enableFlag = false;
     return 0;
 }
 /*
  * servoPP0: point to point move!
  */
 auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int {
-    bool ppModeFlag = true;
+    //若伺服未使能
+    if(!enableFlag){
+        cout<<"禁止！请上使能！"<<endl;
+        return -2999;
+    }
+    // 若此时伺服未设置PP模式
     if (pp_Flag == 0) {
         //设置PP工作模式
         for (auto &child_servo: SendData) {
@@ -165,7 +172,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         if (error_code < 0) {
             return error_code;
         }
-        this_thread::sleep_for(chrono::milliseconds(100));
+        this_thread::sleep_for(chrono::milliseconds(120));
         error_code = p_ads->get(GetData);
         if (error_code < 0) {
             return error_code;
@@ -173,36 +180,38 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         //检查伺服是否为PP工作模式
         for (auto child_servo: GetData) {
             if (child_servo.Mode_of_Operation_disp != 1) {
-                ppModeFlag = false;
+                std::cout << "Servo Operation Mode Change Failure!" << std::endl;
+                error_code = -3000;
+                return error_code;
             }
         }
-    }
-    if (!ppModeFlag) {
-        std::cout << "Servo Operation Mode Change Failure!" << std::endl;
-        error_code = -3000;
-        return error_code;
-    } else {
+        //若未return，则设置伺服模式标志位
         pp_Flag = true;
         cst_Flag = false;
         csp_Flag = false;
     }
+
+    //伺服已设置为PP模式
     th_mutex.lock();
-    error_code = p_ads->set(SendData);// 更新607Ah（Target Position）的值
+
+    // 更新607Ah（Target Position）的值
+    error_code = p_ads->set(SendData);
     th_mutex.unlock();
     if (error_code < 0) {
         return error_code;
     }
+    //控制字BIT4为1，通知伺服器目标位置开始有效
     for (auto &child_servo: SendData)
         child_servo.Control_Word |= 0x10;
-    // 检查伺服是否收到目标点，否则，循环发送控制字的bit4为1；
     th_mutex.lock();
     error_code = p_ads->set(SendData);
     th_mutex.unlock();
-    // 开启线程th1，设置延迟最大20ms即退出
+    // 检查伺服是否收到目标点，否则，循环发送控制字的bit4为1；
     if (error_code < 0) {
         return error_code;
     }
-    //重置标志位指针
+    // 开启线程th1，设置延迟最大20ms即退出
+    //标志位指针
     shared_ptr<bool> servoLag_flag = make_shared<bool>(true);
     auto th = [servoLag_flag] {
         this_thread::sleep_for(chrono::milliseconds(20));
@@ -232,7 +241,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
     // 如果是伺服均收到新的坐标位置，更新控制字，准备下一次位置更新
     if (!target_ack) {
         for (auto &child_servo: SendData) {
-            child_servo.Control_Word &= 0xffef;
+            child_servo.Control_Word &= 0xffef;//控制字BIT4置0
         }
         th_mutex.lock();
         error_code = p_ads->set(SendData);
@@ -263,14 +272,26 @@ auto Driver::servoBreak(const bool &state) -> int {
     }
     return 0;
 }
+/*!
+ * @details 设置伺服器为CST模式，此函数执行后，通过参数SendData的引用实时控制力矩
+ * @param SendData
+ * @param GetData
+ * @return
+ */
 auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
-    bool cstModeFlag = true;
+    //若伺服未使能
+    if(!enableFlag){
+        cout<<"禁止！请先上使能！"<<endl;
+    }
     //如果CST模式已经进入，则直接退出
-    //CST模式下，会有线程持续发送SendData
-    //该模式下，需要外部调整参数SendData的引用
-    if(cst_Flag){
-        cout<<"CST MODE has been running!"<<endl;
+    if (cst_Flag) {
+        cout << "CST MODE has been running!" << endl;
         return 0;
+    }
+    else if(csp_Flag||pp_Flag||enableFlag){
+        cout<<"禁止！ 请下使能后再切换模式！"<<endl;
+        vector<DTS> temp(servoNUMs);
+        this->servoDisable(temp);
     }
     else {
         for (auto &child: SendData) {
@@ -280,39 +301,52 @@ auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
         }
         error_code = p_ads->set(SendData);
         if (error_code < 0) {
-            cout << "Error: set CST MODE! " << endl;
+            cout << "Error: set CST MODE! " << error_code << endl;
         }
         this_thread::sleep_for(chrono::milliseconds(100));
         error_code = p_ads->get(GetData);
+        if (error_code < 0) {
+            cout << "Error: get CST MODE! " << error_code << endl;
+        }
         for (auto child: GetData) {
             if (child.Mode_of_Operation_disp != 10) {
-                cstModeFlag = false;
+                cout << "Error! CST MODE failed!" << endl;
+                return -4000;
             }
         }
-    }
-    if (!cstModeFlag) {
-        cout << "Error! CST MODE failed!" << endl;
-        return -4000;
-    } else {
+        //CST模式设置成功
         pp_Flag = false;
         cst_Flag = true;
-        csp_Flag =false;
+        csp_Flag = false;
     }
+    //设置cyclicFlag 为真，表示Driver开启了循环同步子线程
     *cyclicFlag = true;
-    thread t(&Driver::f_Cyclic,*this,ref(SendData));
+    thread t(&Driver::f_Cyclic, *this, ref(SendData));
     t.detach();
     return 0;
 }
+/*!
+ * @details 设置伺服器为CSP模式，此函数执行后，通过参数SendData的引用实时控制力矩
+ * @param SendData
+ * @param GetData
+ * @return
+ */
 auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
-    bool cspModeFlag = true;
+    //如果未上使能
+    if(!enableFlag){
+        cout<<"禁止！请先上使能！"<<endl;
+    }
     //如果CSP模式已经进入，则直接退出
-    //CSP模式下，会有线程持续发送SendData
-    //该模式下，需要外部控制SendData的引用
-    if(csp_Flag){
-        cout<<"CSP MODE has been running!"<<endl;
+    if (csp_Flag) {
+        cout << "CSP MODE has been running!" << endl;
         return 0;
     }
-    else {
+    //任意模式设置且使能状态，禁止模式切换
+    else if (cst_Flag || pp_Flag || enableFlag) {
+        cout << "禁止！请下使能后再切换模式" << endl;
+        vector<DTS> temp(servoNUMs);
+        this->servoDisable(temp);
+    } else {
         for (auto &child: SendData) {
             child.Mode_of_Operation = 8;
             child.Max_Velocity = 3000;
@@ -320,26 +354,26 @@ auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
         }
         error_code = p_ads->set(SendData);
         if (error_code < 0) {
-            cout << "Error: set CSP MODE! " << endl;
+            cout << "Error: set CSP MODE! " << error_code << endl;
         }
         this_thread::sleep_for(chrono::milliseconds(100));
         error_code = p_ads->get(GetData);
+        if (error_code) {
+            cout << "Error: get CSP MODE! " << error_code << endl;
+        }
         for (auto child: GetData) {
             if (child.Mode_of_Operation_disp != 8) {
-                cspModeFlag = false;
+                cout << "Error! CSP MODE failed!" << endl;
+                return -4000;
             }
         }
-    }
-    if (!cspModeFlag) {
-        cout << "Error! CSP MODE failed!" << endl;
-        return -4000;
-    } else {
         pp_Flag = false;
         csp_Flag = true;
         cst_Flag = false;
     }
+    //设置cyclicFlag为真，表示Driver开启了循环同步子线程
     *cyclicFlag = true;
-    thread t(&Driver::f_Cyclic,*this,ref(SendData));
+    thread t(&Driver::f_Cyclic, *this, ref(SendData));
     t.detach();
     return 0;
 }
