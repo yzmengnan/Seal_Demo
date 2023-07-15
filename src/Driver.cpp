@@ -278,7 +278,7 @@ auto Driver::servoBreak(const bool &state) -> int {
  * @param GetData
  * @return
  */
-auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
+auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData)->int {
     //若伺服未使能
     if(!enableFlag){
         cout<<"禁止！请先上使能！"<<endl;
@@ -311,6 +311,7 @@ auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
         for (auto child: GetData) {
             if (child.Mode_of_Operation_disp != 10) {
                 cout << "Error! CST MODE failed!" << endl;
+                this->servoDisable(SendData);
                 return -4000;
             }
         }
@@ -331,7 +332,7 @@ auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
  * @param GetData
  * @return
  */
-auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
+auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData)->int{
     //如果未上使能
     if(!enableFlag){
         cout<<"禁止！请先上使能！"<<endl;
@@ -364,7 +365,8 @@ auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
         for (auto child: GetData) {
             if (child.Mode_of_Operation_disp != 8) {
                 cout << "Error! CSP MODE failed!" << endl;
-                return -4000;
+                this->servoDisable(SendData);
+                return -4001;
             }
         }
         pp_Flag = false;
