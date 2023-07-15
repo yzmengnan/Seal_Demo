@@ -11,24 +11,37 @@ int main(int argc, char const *argv[]) {
     ptr_dev->Enable();
     vector<DTS> senddata{ptr_dev->getSendData()};
     vector<DFS> getdata(servoNUMs);
-//    ptr_dev->servoCST(senddata,getdata);
-        ptr_dev->servoCSP(senddata,getdata);
-    int nums{};
-    while(nums<50){
-        senddata[0].Target_Pos-=1200000;
-//        Sleep(100);
-//        senddata[0].Target_Pos=-900;
-        Sleep(3);
-        nums++;
+    ptr_dev->servoCST(senddata,getdata);
+//        ptr_dev->servoCSP(senddata,getdata);
+    int all{};
+    while(all<3) {
+        int nums{};
+        while (nums < 500) {
+            senddata[0].Target_Torque += 1;
+            //        Sleep(100);
+            //        senddata[0].Target_Pos=-900;
+            Sleep(3);
+            nums++;
+        }
+        senddata[0].Target_Torque=0;
+        Sleep(100);
+        while (nums > 0) {
+            senddata[0].Target_Torque -= 1;
+            //        Sleep(100);
+            //        senddata[0].Target_Pos=-900;
+            Sleep(3);
+            nums--;
+        }
+        senddata[0].Target_Torque = 0;
+
+        all++;
     }
-    Sleep(2000);
-    while(nums>0){
-        senddata[0].Target_Pos+=1100000;
-        //        Sleep(100);
-        //        senddata[0].Target_Pos=-900;
-        Sleep(3);
-        nums--;
-    }
+    ptr_dev->Disable();
+    Sleep(1000);
+    ptr_dev->Enable();
+    Sleep(3000);
+    ptr_dev->Write('0',0.0f);
+    Sleep(13000);
     ptr_dev->Disable();
     Sleep(1000);
     return 0;
