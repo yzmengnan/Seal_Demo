@@ -9,11 +9,11 @@
  * Copyright (c) 2023 by YangQ, All Rights Reserved.
  */
 #include "Driver.h"
+#include "motionDataTransform.hpp"
 #include <algorithm>
 #include <chrono>
 #include <memory>
 #include <thread>
-#include "motionDataTransform.hpp"
 mutex th_mutex;
 Driver::Driver(Tc_Ads &ads_handle) {
     p_ads = &ads_handle;
@@ -34,8 +34,8 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         }
         if (state == servoNUMs) {
             cout << "All servo has been enabled!" << endl;
-            for(auto& child:SendData){
-                child.Control_Word|=0x000f;
+            for (auto &child: SendData) {
+                child.Control_Word |= 0x000f;
             }
             state = 0;
             return 0;
@@ -116,7 +116,7 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         }
         if (state == servoNUMs) {
             std::cout << "All Servos Operation enabled!" << std::endl;
-            this_thread::sleep_for(chrono::milliseconds(100));
+            this_thread::sleep_for(chrono::milliseconds(120));
             servoBreak(true);
             state = 0;
             return 0;
@@ -132,6 +132,9 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
 }
 
 auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
+    if(*cyclicFlag){
+        this->servoFinishCS();
+    }
     servoBreak(false);
     pp_Flag = false;
     for (auto &child_servo: SendData) {
@@ -162,6 +165,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         if (error_code < 0) {
             return error_code;
         }
+        this_thread::sleep_for(chrono::milliseconds(100));
         error_code = p_ads->get(GetData);
         if (error_code < 0) {
             return error_code;
@@ -177,8 +181,11 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         std::cout << "Servo Operation Mode Change Failure!" << std::endl;
         error_code = -3000;
         return error_code;
-    } else
+    } else {
         pp_Flag = true;
+        cst_Flag = false;
+        csp_Flag = false;
+    }
     th_mutex.lock();
     error_code = p_ads->set(SendData);// 更新607Ah（Target Position）的值
     th_mutex.unlock();
@@ -208,7 +215,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
     while (target_ack && *servoLag_flag) {
         int statusReadyCount = 0;
         // 获取伺服状态字
-         th_mutex.lock();
+        th_mutex.lock();
         error_code = p_ads->get(GetData);
         th_mutex.unlock();
         if (error_code) {
@@ -256,22 +263,101 @@ auto Driver::servoBreak(const bool &state) -> int {
     }
     return 0;
 }
+auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
+    bool cstModeFlag = true;
+    //如果CST模式已经进入，则直接退出
+    //CST模式下，会有线程持续发送SendData
+    //该模式下，需要外部调整参数SendData的引用
+    if(cst_Flag){
+        cout<<"CST MODE has been running!"<<endl;
+        return 0;
+    }
+    else {
+        for (auto &child: SendData) {
+            child.Mode_of_Operation = 10;
+            child.Max_Torque = 1500;
+            child.Max_Velocity = 3000;
+        }
+        error_code = p_ads->set(SendData);
+        if (error_code < 0) {
+            cout << "Error: set CST MODE! " << endl;
+        }
+        this_thread::sleep_for(chrono::milliseconds(100));
+        error_code = p_ads->get(GetData);
+        for (auto child: GetData) {
+            if (child.Mode_of_Operation_disp != 10) {
+                cstModeFlag = false;
+            }
+        }
+    }
+    if (!cstModeFlag) {
+        cout << "Error! CST MODE failed!" << endl;
+        return -4000;
+    } else {
+        pp_Flag = false;
+        cst_Flag = true;
+        csp_Flag =false;
+    }
+    *cyclicFlag = true;
+    thread t(&Driver::f_Cyclic,*this,ref(SendData));
+    t.detach();
+    return 0;
+}
+auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
+    bool cspModeFlag = true;
+    //如果CSP模式已经进入，则直接退出
+    //CSP模式下，会有线程持续发送SendData
+    //该模式下，需要外部控制SendData的引用
+    if(csp_Flag){
+        cout<<"CSP MODE has been running!"<<endl;
+        return 0;
+    }
+    else {
+        for (auto &child: SendData) {
+            child.Mode_of_Operation = 8;
+            child.Max_Velocity = 3000;
+            child.Max_Torque = 1500;
+        }
+        error_code = p_ads->set(SendData);
+        if (error_code < 0) {
+            cout << "Error: set CSP MODE! " << endl;
+        }
+        this_thread::sleep_for(chrono::milliseconds(100));
+        error_code = p_ads->get(GetData);
+        for (auto child: GetData) {
+            if (child.Mode_of_Operation_disp != 8) {
+                cspModeFlag = false;
+            }
+        }
+    }
+    if (!cspModeFlag) {
+        cout << "Error! CSP MODE failed!" << endl;
+        return -4000;
+    } else {
+        pp_Flag = false;
+        csp_Flag = true;
+        cst_Flag = false;
+    }
+    *cyclicFlag = true;
+    thread t(&Driver::f_Cyclic,*this,ref(SendData));
+    t.detach();
+    return 0;
+}
 MotionV1::MotionV1(Tc_Ads &ads_handle) : Driver(ads_handle) {
     cout << "MotionV1 control module built!" << endl;
     auto dataUpdating_MOTIONV1 = [&]() {
         while (true) {
             auto err = this->GetDataUpdate(MotGetData);
-            if(err<0){
-                cout<<"Error updating servo data error in MotionV1 "<<err<<endl;
+            if (err < 0) {
+                cout << "Error updating servo data error in MotionV1 " << err << endl;
                 break;
             }
             this_thread::sleep_for(chrono::milliseconds(1));
-       }
+        }
     };
     thread t(dataUpdating_MOTIONV1);
     t.detach();
-    cout<<"MotionV1 is updating the servo data background!"<<endl;
-
+    cout << "MotionV1 is updating the servo data background!" << endl;
 }
 int MotionV1::Enable() {
     auto err = servoEnable(MotSendData, MotGetData);
@@ -287,18 +373,18 @@ int MotionV1::Disable() {
     }
     return 0;
 }
-vector<DTS>& MotionV1::gearRatio_Scalar(initializer_list<float> args) {
+vector<DTS> &MotionV1::gearRatio_Scalar(initializer_list<float> args) {
     char i{};
     vector<float> angles;
-    for(auto index=args.begin();index!=args.end();index++,i++){
-        if(i>=servoNUMs)
+    for (auto index = args.begin(); index != args.end(); index++, i++) {
+        if (i >= servoNUMs)
             return MotSendData;
         angles.push_back(*index);
     }
-    MDT::fromAnglesToPulses(*this,angles,this->MotSendData);
+    MDT::fromAnglesToPulses(*this, angles, this->MotSendData);
     return MotSendData;
 }
 MotionV1::~MotionV1() {
     this->Disable();
-    cout<<"Motion V1 controller disable!"<<endl;
+    cout << "Motion V1 controller disable!" << endl;
 }
