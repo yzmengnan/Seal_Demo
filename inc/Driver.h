@@ -87,7 +87,8 @@ private:
         cout << "Cyclic START!" << endl;
         while (*cyclicFlag) {
             for(auto s:SendData){
-                cout<<"data: "<<s.Target_Pos<<",";
+                cout<<"Pos: "<<s.Target_Pos<<",";
+                cout<<"Torque: "<<s.Target_Torque<<",";
             }
             cout<<endl;
             p_ads->set(SendData);
@@ -129,7 +130,7 @@ public:
         if (operationMode == '0') {
             // Normal motion with no sync-vec and no target change immediately
             int err = servoPP0(MotSendData, MotGetData);
-            if (err < -1) {
+            if (err < 0) {
                 cout << "MotionV1 : pp0 error" << err << endl;
                 return err;
             }
