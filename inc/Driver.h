@@ -65,8 +65,8 @@ public:
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
      */
     auto servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
-    auto servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int;
-    auto servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int;
+    auto servoCST(vector<DTS> &SendData, vector<DFS> &GetData)->int ;
+    auto servoCSP(vector<DTS> &SendData, vector<DFS> &GetData)->int ;
 
     virtual ~Driver();
 
@@ -136,14 +136,6 @@ public:
                 return err;
             }
         } else if (operationMode == '1') {
-            //motion with sync-vec
-            //get the servo data
-            //canceled since the data is updating background
-            //            auto err = GetDataUpdate(MotGetData);
-            //            if(err<0){
-            //                cout<<"MotionV1 Write error! "<< err<<endl;
-            //                return err;
-            //            }
             vector<uint32_t> Delta{};
             for (int i = 0; i < servoNUMs; i++) {
                 Delta.push_back(abs(MotSendData[i].Target_Pos - MotGetData[i].Actual_Pos));
