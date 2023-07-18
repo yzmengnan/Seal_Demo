@@ -1,6 +1,6 @@
+#include "Data_Log.hpp"
 #include "Driver.h"
 #include "Multi_Process.h"
-#include "logOperation.hpp"
 #include "motionDataTransform.hpp"
 #include "vector"
 #include <chrono>
@@ -12,6 +12,10 @@ void breaktest(MotionV1 &m);
 //#define TEST
 
 int main() {
+    if(servoNUMs>=4){
+        cout<<"Error! Only support for debugging up to 3 axises!"<<endl;
+        ExitProcess(1);
+    }
     //build variables
     Tc_Ads ads;                               //ads handle
     Multi_Process p;                          //safety care class
@@ -21,7 +25,7 @@ int main() {
 
 
 #ifndef TEST
-            // add safety program
+    // add safety program
     auto pi = p.safety_monitor_build("safe_program.exe");
 
     // add background thread to print information
