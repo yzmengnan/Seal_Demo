@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 {
 //    SetConsoleOutputCP(CP_UTF8);
     cout<<"\n ** This is a message from the monitor process. ** \n";
-    CHAR chBuf[buffsize];
+    string buf(buffsize,0);
     DWORD len;
     HANDLE handle_read;
     handle_read = GetStdHandle(STD_INPUT_HANDLE);
@@ -21,13 +21,13 @@ int main(int argc, char* argv[])
     for (;;)
     {
         // Read from standard input and stop on error or no data.
-        bool ret = ReadFile(handle_read, chBuf, buffsize, &len, NULL);
+        bool ret = ReadFile(handle_read, buf.data(), buffsize, &len, NULL);
         if (!ret || len == 0)
         {
             cout << "ReadFile error!" << endl;
             break;
         }
-        cout <<chBuf << endl;
+        cout <<buf << endl;
         Sleep(10);
     }
     cout << "finish reading!" << endl;
