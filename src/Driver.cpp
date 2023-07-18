@@ -166,7 +166,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
         //设置PP工作模式
         for (auto &child_servo: SendData) {
             child_servo.Mode_of_Operation = 1;
-            child_servo.Max_Velocity = 2500;
+            child_servo.Max_Velocity = 3000;
         }
         error_code = p_ads->set(SendData);
         if (error_code < 0) {
