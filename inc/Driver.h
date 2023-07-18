@@ -4,11 +4,9 @@
 #pragma once
 
 #include "DATA_STRUCT.h"
-#include "Data_Record.h"
 #include "MONITOR.h"
 #include "Tc_Ads.h"
 #include "TimerCounter.h"
-#include "jointDataProcess.h"
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -21,8 +19,7 @@ using namespace std;
 extern mutex th_mutex;
 using sd = class Driver {
 public:
-    vector<float> _driver_gearRatioScalar{vector<float>(servoNUMs, 8388608 / 360)};
-
+    vector<float> _driver_gearRatioScalar{vector<float>{181.22, 144.9 * 5 / 3, 33.0 * 5 / 3}};
 public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
@@ -65,8 +62,8 @@ public:
      * @description: PP运动驱动程序,动作例1,执行点到点单独运动
      */
     auto servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
-    auto servoCST(vector<DTS> &SendData, vector<DFS> &GetData)->int ;
-    auto servoCSP(vector<DTS> &SendData, vector<DFS> &GetData)->int ;
+    auto servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int;
+    auto servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int;
 
     virtual ~Driver();
 
@@ -81,26 +78,25 @@ private:
     bool cst_Flag = false;// 1 ready, 0 not ready
     bool csp_Flag = false;// 1 ready, 0 not ready
     bool enableFlag = false;
-    shared_ptr<bool> cyclicFlag = make_shared<bool>(false) ;
+    shared_ptr<bool> cyclicFlag = make_shared<bool>(false);
     pTc_Ads p_ads = nullptr;
     int error_code = 0;
     void f_Cyclic(vector<DTS> &SendData) {
         cout << "Cyclic START!" << endl;
         while (*cyclicFlag) {
-            for(auto s:SendData){
-                cout<<"Pos: "<<s.Target_Pos<<",";
-                cout<<"Torque: "<<s.Target_Torque<<",";
+            for (auto s: SendData) {
+                cout << "Pos: " << s.Target_Pos << ",";
+                cout << "Torque: " << s.Target_Torque << ",";
             }
-            cout<<endl;
+            cout << endl;
             p_ads->set(SendData);
             this_thread::sleep_for(chrono::milliseconds(10));
         }
         cout << "Cyclic QUIT!" << endl;
     }
-    void servoFinishCS(){
-        *cyclicFlag =false;
+    void servoFinishCS() {
+        *cyclicFlag = false;
     }
-
 };
 
 class MotionV1 : public Driver {
