@@ -20,7 +20,7 @@ int main() {
     Tc_Ads ads;                               //ads handle
     Multi_Process p;                          //safety care class
     mt thread1;                               // monitor class
-    file_log ff;                              // file record
+    file_log fl;                              // file record
     auto ptr_dev = make_shared<MotionV1>(ads);//controller ptr
 
 
@@ -33,8 +33,8 @@ int main() {
     pr.detach();
 
     //add background thread to record servo data
-    thread rd(&file_log::writeFile, ff, *ptr_dev);
-    rd.detach();
+    thread rcd(&file_log::writeFile, fl, *ptr_dev);
+    rcd.detach();
     this_thread::sleep_for(chrono::seconds(3));
 
     //main actions!
