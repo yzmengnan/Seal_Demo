@@ -39,12 +39,16 @@ int main() {
 
     //main actions!
     ptr_dev->Enable();
-    ptr_dev->setProfileVelocity(30000.3f);
-    ptr_dev->Write('0', 1000.0f);
-    this_thread::sleep_for(chrono::seconds(10));
-    ptr_dev->setSyncrpm(1000);
-    ptr_dev->Write('1', 0.0f);
-    this_thread::sleep_for(chrono::seconds(1));
+//    ptr_dev->setProfileVelocity(30/10);
+    string m;
+    cin>>m;
+    while(true) {
+        ptr_dev->Write('1', 5.0f);
+        this_thread::sleep_for(chrono::seconds(5));
+        ptr_dev->setSyncrpm(10);
+        ptr_dev->Write('1', 0.0f);
+        this_thread::sleep_for(chrono::seconds(5));
+    }
     ptr_dev->Disable();
 
     //kill safety process
