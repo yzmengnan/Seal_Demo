@@ -211,7 +211,7 @@
 				<Name>Device 2 (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
-						<DeviceDesc>? 2 (Intel(R) Ethernet Connection (16) I219-V)</DeviceDesc>
+						<DeviceDesc>ÒÔÌ«Íø 2 (Intel(R) Ethernet Connection (16) I219-V)</DeviceDesc>
 						<DeviceName>\DEVICE\{6239ECA9-B202-4DF6-857E-0F36B9ED5BE1}</DeviceName>
 						<DeviceData>6c240851b939</DeviceData>
 					</Pnp>

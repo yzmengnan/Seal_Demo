@@ -42,8 +42,8 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{03B0459A-CFEA-1F19-BCE6-13AC4AC25277}" AutoDeleteType="true">Axis_output</Name>
-			<BitSize>224</BitSize>
+			<Name GUID="{EACF56C5-8DDE-CB73-1DD0-7611CD5C6896}" AutoDeleteType="true">Axis_output</Name>
+			<BitSize>192</BitSize>
 			<SubItem>
 				<Name>Control_Word</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000004}">WORD</Type>
@@ -109,9 +109,9 @@
 			</SubItem>
 			<SubItem>
 				<Name>Target_Torque</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>160</BitOffs>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>144</BitOffs>
 				<Default>
 					<Value>0</Value>
 				</Default>
@@ -124,9 +124,9 @@
 			</SubItem>
 			<SubItem>
 				<Name>Max_Torque</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>192</BitOffs>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>160</BitOffs>
 				<Default>
 					<Value>0</Value>
 				</Default>
@@ -156,7 +156,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{CCE48895-ECF9-4B2D-BBB7-CEBE9AF247F4}" Name="plc" PrjFilePath="plc\plc.plcproj" TmcFilePath="plc\plc.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcPath="plc\plc.tmc" TmcHash="{6FFD90CB-19EE-360B-7C43-C4E2FB2BFCAE}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcPath="plc\plc.tmc" TmcHash="{F253407E-EC34-C4C9-A2D0-B19F5DCE8DB7}">
 					<Name>plc Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -174,11 +174,11 @@
 						<Name>PlcTask Outputs</Name>
 						<Var>
 							<Name>MAIN.Axis0</Name>
-							<Type GUID="{03B0459A-CFEA-1F19-BCE6-13AC4AC25277}">Axis_output</Type>
+							<Type GUID="{EACF56C5-8DDE-CB73-1DD0-7611CD5C6896}">Axis_output</Type>
 						</Var>
 						<Var>
 							<Name>MAIN.Axis1</Name>
-							<Type GUID="{03B0459A-CFEA-1F19-BCE6-13AC4AC25277}">Axis_output</Type>
+							<Type GUID="{EACF56C5-8DDE-CB73-1DD0-7611CD5C6896}">Axis_output</Type>
 						</Var>
 						<Var>
 							<Name>MAIN.BREAK0</Name>
@@ -189,14 +189,6 @@
 							<Type>BOOL</Type>
 						</Var>
 					</Vars>
-					<UnrestoredVarLinks ImportTime="2023-07-14T11:38:34">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^plc^plc Instance" Type="2">
-							<OwnerB Name="TIID^Device 2 (EtherCAT)^Drive 3 (MBDLN25BE)">
-								<Link VarA="MAIN.Axis0^Max_Torque" TypeA="UINT" InOutA="1" ParentTypeA="Axis_output" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Receive PDO mapping 1^Max torque" RestoreInfo="TypeMismatch" OldTypeA="UINT" OldGuidA="{18071995-0000-0000-0000-000000000005}" NewTypeA="UDINT" NewGuidA="{18071995-0000-0000-0000-000000000008}"/>
-								<Link VarA="MAIN.Axis0^Target_Torque" TypeA="INT" InOutA="1" ParentTypeA="Axis_output" GuidA="{18071995-0000-0000-0000-000000000006}" VarB="Receive PDO mapping 1^Target torque" RestoreInfo="TypeMismatch" OldTypeA="INT" OldGuidA="{18071995-0000-0000-0000-000000000006}" NewTypeA="DINT" NewGuidA="{18071995-0000-0000-0000-000000000009}"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id>0</Id>
@@ -756,10 +748,12 @@
 				<Link VarA="PlcTask Inputs^MAIN.Axis0_status^Mode_of_Operation_disp" VarB="Transmit PDO mapping 1^Modes of operation display"/>
 				<Link VarA="PlcTask Inputs^MAIN.Axis0_status^Status" VarB="Transmit PDO mapping 1^Statusword"/>
 				<Link VarA="PlcTask Outputs^MAIN.Axis0^Control_Word" VarB="Receive PDO mapping 1^Controlword"/>
+				<Link VarA="PlcTask Outputs^MAIN.Axis0^Max_Torque" VarB="Receive PDO mapping 1^Max torque"/>
 				<Link VarA="PlcTask Outputs^MAIN.Axis0^Max_Velocity" VarB="Receive PDO mapping 1^Max motor speed"/>
 				<Link VarA="PlcTask Outputs^MAIN.Axis0^Mode_of_Operation" VarB="Receive PDO mapping 1^Modes of operation"/>
 				<Link VarA="PlcTask Outputs^MAIN.Axis0^Profile_Velocity" VarB="Receive PDO mapping 1^Profile velocity"/>
 				<Link VarA="PlcTask Outputs^MAIN.Axis0^Target_Position" VarB="Receive PDO mapping 1^Target position"/>
+				<Link VarA="PlcTask Outputs^MAIN.Axis0^Target_Torque" VarB="Receive PDO mapping 1^Target torque"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 2 (EtherCAT)^Drive 4 (MBDLN25BE)">
 				<Link VarA="PlcTask Inputs^MAIN.Axis1_status^Actual_Position" VarB="Transmit PDO mapping 1^Position actual value"/>
