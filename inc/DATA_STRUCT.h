@@ -11,10 +11,12 @@
 #pragma once
 
 #include <Windows.h>
-
+#include <cstdint>
+#include<vector>
 #define DTS_SIZE 22
 #define DFS_SIZE 20
 #define servoNUMs 1
+static std::vector<int32_t> pulse_offset{-382944720,-506320482,42662099};
 
 using DTS = struct Data_To_Servo {
     UINT16 Control_Word = 0;
