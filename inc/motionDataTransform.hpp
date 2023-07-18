@@ -6,47 +6,46 @@
 #define SEAL_DEMO_MOTIONDATATRANSFORM_HPP
 
 #include "DATA_STRUCT.h"
-#include <vector>
-#include "windows.h"
 #include "Driver.h"
+#include "windows.h"
+#include <vector>
 using namespace std;
-static vector<int32_t>pulse_offset{-382944720,-506320482,42662099};
-using MDT = class motionDataTransform{
+using MDT = class motionDataTransform {
 public:
-   static vector<float> getAngles(Driver& d,const vector<DFS>& getData){
+public:
+
+    static vector<float> getAngles(Driver &d, const vector<DFS> &getData) {
         vector<float> result{};
         int i{};
-        for(auto g:getData){
-            result.push_back((g.Actual_Pos+pulse_offset[i])/d._driver_gearRatioScalar[i]);
+        for (auto g: getData) {
+            result.push_back((g.Actual_Pos + pulse_offset[i]) / d._driver_gearRatioScalar[i]);
             i++;
         }
         return result;
     }
-    static void fromAnglesToPulses(Driver& d,const vector<float>& angles, vector<DTS>&SendData){
-       int i{};
-       for(auto &s:SendData){
-            s.Target_Pos = (angles[i])*d._driver_gearRatioScalar[i]-pulse_offset[i];
+    static void fromAnglesToPulses(Driver &d, const vector<float> &angles, vector<DTS> &SendData) {
+        int i{};
+        for (auto &s: SendData) {
+            s.Target_Pos = (angles[i]) * d._driver_gearRatioScalar[i] - pulse_offset[i];
             i++;
-       }
+        }
     }
-    static vector<float>getMoments(Driver& d,const vector<DFS>&getData){
-       vector<float> result{};
-       for(auto g:getData){
-            result.push_back(g.Actual_Torque*1.21/1000);
-       }
-       return result;
+    static vector<float> getMoments(Driver &d, const vector<DFS> &getData) {
+        vector<float> result{};
+        for (auto g: getData) {
+            result.push_back(g.Actual_Torque * 1.21 / 1000);
+        }
+        return result;
     }
-    static vector<float>getVecs(Driver& d,const vector<DFS>&getData){
-      vector<float> result{};
-      int i{};
-      for(auto g:getData){
-            result.push_back(g.Actual_Vec/d._driver_gearRatioScalar[i]);
+    static vector<float> getVecs(Driver &d, const vector<DFS> &getData) {
+        vector<float> result{};
+        int i{};
+        for (auto g: getData) {
+            result.push_back(g.Actual_Vec / d._driver_gearRatioScalar[i]);
             i++;
-      }
-      return result;
+        }
+        return result;
     }
-private:
 };
-
 
 #endif//SEAL_DEMO_MOTIONDATATRANSFORM_HPP
