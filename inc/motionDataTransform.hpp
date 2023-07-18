@@ -10,13 +10,14 @@
 #include "windows.h"
 #include "Driver.h"
 using namespace std;
+static vector<int32_t>pulse_offset{-382944720,-506320482,42662099};
 using MDT = class motionDataTransform{
 public:
    static vector<float> getAngles(Driver& d,const vector<DFS>& getData){
         vector<float> result{};
         int i{};
         for(auto g:getData){
-            result.push_back(g.Actual_Pos/d._driver_gearRatioScalar[i]);
+            result.push_back((g.Actual_Pos+pulse_offset[i])/d._driver_gearRatioScalar[i]);
             i++;
         }
         return result;
@@ -24,7 +25,7 @@ public:
     static void fromAnglesToPulses(Driver& d,const vector<float>& angles, vector<DTS>&SendData){
        int i{};
        for(auto &s:SendData){
-            s.Target_Pos = angles[i]*d._driver_gearRatioScalar[i];
+            s.Target_Pos = (angles[i])*d._driver_gearRatioScalar[i]-pulse_offset[i];
             i++;
        }
     }
@@ -45,7 +46,6 @@ public:
       return result;
     }
 private:
-    shared_ptr<vector<float>> gearRatio= nullptr;
 };
 
 
