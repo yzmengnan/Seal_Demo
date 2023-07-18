@@ -15,7 +15,6 @@
 #include "DATA_STRUCT.h"
 #include "Driver.h"
 #include "Tc_Ads.h"
-#include "jointDataProcess.h"
 #include <chrono>
 #include <iostream>
 #include <thread>
