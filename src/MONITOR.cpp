@@ -61,24 +61,25 @@ void MONITOR::print_info(Driver d, const string &name) {
                 time_tm->tm_mon + 1, time_tm->tm_mday, time_tm->tm_hour,
                 time_tm->tm_min, time_tm->tm_sec, (int) dis_millseconds);
         ostringstream message;
-        message<<"["<<string(strTime)<<"]";
+        message << "[" << string(strTime) << "]";
         auto fadd_space = [](float data) {
             string s = to_string(data);
             s = s.substr(0, s.find('.') + 4);
-            while (s.size() < 10)
+            while (s.size() < 6)
                 s = " " + s;
             return s;
         };
-        auto angs = MDT::getAngles(d,GetData);
-        auto vecs = MDT::getVecs(d,GetData);
-        auto moms = MDT::getMoments(d, GetData);
-        for(int i =0;i<3;i++) {
+        vector<vector<float>> data{MDT::getAngles(d, GetData),
+                                   MDT::getVecs(d, GetData),
+                                   MDT::getMoments(d, GetData)};
+        vector<string> keys{"angles: ", "vecs: ", "moments: "};
+        for (int i = 0; i < 3; i++) {
+            message << keys[i];
             for (int j = 0; j < servoNUMs; j++) {
-                message<<fadd_space(moms[i]);
+                message << fadd_space(data[i][j]);
             }
-            message<<"---";
+            message << " ";
         }
-        message <<"!"<<endl;
         auto message_data = message.str();
         WriteFile(handle_write, message_data.data(), message_data.size(), &len, NULL);
         this_thread::sleep_for(chrono::milliseconds(10));
