@@ -17,9 +17,10 @@
 #include <vector>
 using namespace std;
 extern mutex th_mutex;
+#define angles2Pulses 8388608/360
 using sd = class Driver {
 public:
-    vector<float> _driver_gearRatioScalar{vector<float>{181.22, 144.9 * 5 / 3, 33.0 * 5 / 3}};
+    vector<float> _driver_gearRatioScalar{vector<float>{181.22*angles2Pulses, 144.9 * 5 / 3*angles2Pulses, 33.0 * 5 / 3*angles2Pulses}};
 public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
@@ -134,12 +135,13 @@ public:
         } else if (operationMode == '1') {
             vector<uint32_t> Delta{};
             for (int i = 0; i < servoNUMs; i++) {
-                Delta.push_back(abs(MotSendData[i].Target_Pos - MotGetData[i].Actual_Pos));
+                Delta.push_back(abs(MotSendData[i].Target_Pos - (MotGetData[i].Actual_Pos+pulse_offset[i])));
             }
             uint32_t maxDelta = *max_element(Delta.begin(), Delta.end());
             //calculate and update each joint`s velocity
             for (int vec_index = 0; vec_index < servoNUMs; vec_index++) {
-                MotSendData[vec_index].Profile_Velocity = sync_rpm * ((float) (Delta[vec_index] / maxDelta)) * this->_driver_gearRatioScalar[vec_index] * 6;
+                MotSendData[vec_index].Profile_Velocity = sync_rpm * ((float) (Delta[vec_index] / maxDelta)) * this->_driver_gearRatioScalar[vec_index] / 6;
+                MotSendData[vec_index].Max_Velocity = 3000;
             }
             auto err = servoPP0(MotSendData, MotGetData);
             if (err < 0) {
@@ -186,5 +188,5 @@ private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
     vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
     vector<DTS> &gearRatio_Scalar(initializer_list<float> args);
-    int sync_rpm{100};
+    int sync_rpm{50};
 };
