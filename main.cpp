@@ -12,8 +12,8 @@ void breaktest(MotionV1 &m);
 //#define TEST
 
 int main() {
-    if(servoNUMs>=4){
-        cout<<"Error! Only support for debugging up to 3 axises!"<<endl;
+    if (servoNUMs >= 4) {
+        cout << "Error! Only support for debugging up to 3 axises!" << endl;
         ExitProcess(1);
     }
     //build variables
@@ -29,26 +29,27 @@ int main() {
     auto pi = p.safety_monitor_build("safe_program.exe");
 
     // add background thread to print information
-    thread pr(&mt::print_info, thread1, *ptr_dev, "printinfo.exe");
+    thread pr(&mt::sendMessage, thread1, ref(*ptr_dev), "dataMonitor.exe");
     pr.detach();
 
     //add background thread to record servo data
-    thread rcd(&file_log::writeFile, fl, *ptr_dev);
+    thread rcd(&file_log::writeFile, fl, ref(*ptr_dev));
     rcd.detach();
     this_thread::sleep_for(chrono::seconds(3));
 
     //main actions!
     ptr_dev->Enable();
     ptr_dev->setProfileVelocity(1);
-    int m;
-    cin>>m;
-    while(m>0) {
+    int counts;
+    cin >> counts;
+    while (counts > 0) {
         ptr_dev->Write('0', 1.0f);
-        this_thread::sleep_for(chrono::seconds(5));
-//        ptr_dev->setSyncrpm(10);
+        this_thread::sleep_for(chrono::milliseconds (2000));
+        //        ptr_dev->setSyncrpm(10);
         ptr_dev->Write('0', 0.0f);
-        this_thread::sleep_for(chrono::seconds(5));
-        m--;
+        this_thread::sleep_for(chrono::milliseconds(2000));
+        counts--;
+        cout << "Remaining: " << counts << endl;
     }
     ptr_dev->Disable();
     //kill safety process
