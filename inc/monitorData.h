@@ -3,7 +3,7 @@
  * @Date: 2023-02-28 16:41:33
  * @LastEditors: YangQ
  * @LastEditTime: 2023-03-08 21:34:27
- * @FilePath: \Demo0\INC\MONITOR.h
+ * @FilePath: \Demo0\INC\monitorData.h
  * @Description:
  *
  * Copyright (c) 2023 by YangQ, All Rights Reserved.
@@ -22,11 +22,11 @@
 #include<memory>
 #include "Multi_Process.h"
 #include "Driver.h"
-class Driver;
 using namespace std;
-using mt = class MONITOR {
+class MotionV1;
+using mt = class monitorData {
 public:
-    void print_info(Driver d,const string& name);
+    void sendMessage(const MotionV1& m1,const string& name);
 private:
     int error_code = 0;
 };
