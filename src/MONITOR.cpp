@@ -37,7 +37,7 @@ void MONITOR::print_info(Driver d, const string &name) {
         enableFlag = false;
     }
     Multi_Process p;
-    if (p.monitor(name, handle_read) != 0) {
+    if (p.data_monitor(name, handle_read) != 0) {
         enableFlag = false;
         cout << "监视进程创建失败！" << endl;
     }
@@ -50,10 +50,10 @@ void MONITOR::print_info(Driver d, const string &name) {
             cout << "Get Monitor Data error! Ads error: " << servoData_success << endl;
             ExitProcess(1);
         }
-
         auto now = std::chrono::system_clock::now();
         //通过不同精度获取相差的毫秒数
-        uint64_t dis_millseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() - std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() * 1000;
+        uint64_t dis_millseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() -
+                                   std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() *1000;
         time_t tt = std::chrono::system_clock::to_time_t(now);
         auto time_tm = localtime(&tt);
         char strTime[25] = {};

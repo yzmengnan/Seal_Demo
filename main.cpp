@@ -19,7 +19,7 @@ int main() {
     //build variables
     Tc_Ads ads;                               //ads handle
     Multi_Process p;                          //safety care class
-    mt thread1;                               // monitor class
+    mt thread1;                               // data_monitor class
     file_log fl;                              // file record
     auto ptr_dev = make_shared<MotionV1>(ads);//controller ptr
 

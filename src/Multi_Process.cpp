@@ -58,7 +58,7 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build(const string& name) {
     // Close process and thread handles.
     return pi;
 }
-int Multi_Process::monitor(const string& name,HANDLE&handle_read) {
+int Multi_Process::data_monitor(const string& name,HANDLE&handle_read) {
 
     SetConsoleOutputCP(CP_UTF8);
     cout<<"创建监视进程！"<<endl;

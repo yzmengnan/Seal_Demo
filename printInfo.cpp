@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 //    SetConsoleOutputCP(CP_UTF8);
-    cout<<"\n ** This is a message from the monitor process. ** \n";
+    cout<<"\n ** This is a message from the data_monitor process. ** \n";
     string buf(buffsize,0);
     DWORD len;
     HANDLE handle_read;
