@@ -52,8 +52,9 @@ int main(void) {
 void safety_behaviour() {
     Tc_Ads ads;
     Driver dev(ads);
-    vector<DTS> sendData(servoNUMs);
-    dev.servoDisable(sendData);
+    //force the enable flag equals 1 to force disable!
+    dev.enableFlag = true;
+    cout<<"This is Safety Check program!"<<endl;
     cout << "EMERGENCY QUIT!" << endl;
 }
 void PrintProcessNameAndID(DWORD processID) {
