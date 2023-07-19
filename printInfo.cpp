@@ -31,7 +31,6 @@ int main(int argc, char* argv[])
         Sleep(10);
     }
     cout << "finish reading!" << endl;
-    Sleep(5000);
     freopen("CON", "r", stdin);    // 重定向输入,否则system("pause")会无效
     //CloseHandle(handle_read);
 //    system("pause");
