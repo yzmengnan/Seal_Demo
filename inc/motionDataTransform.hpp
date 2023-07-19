@@ -14,7 +14,7 @@ using MDT = class motionDataTransform {
 public:
 public:
 
-    static vector<float> getAngles(Driver &d, const vector<DFS> &getData) {
+    static vector<float> getAngles(const Driver &d, const vector<DFS> &getData) {
         vector<float> result{};
         int i{};
         for (auto g: getData) {
@@ -23,21 +23,21 @@ public:
         }
         return result;
     }
-    static void fromAnglesToPulses(Driver &d, const vector<float> &angles, vector<DTS> &SendData) {
+    static void fromAnglesToPulses(const Driver &d, const vector<float> &angles, vector<DTS> &SendData) {
         int i{};
         for (auto &s: SendData) {
             s.Target_Pos = (angles[i]) * d._driver_gearRatioScalar[i] - pulse_offset[i];
             i++;
         }
     }
-    static vector<float> getMoments(Driver &d, const vector<DFS> &getData) {
+    static vector<float> getMoments(const Driver &d, const vector<DFS> &getData) {
         vector<float> result{};
         for (auto g: getData) {
             result.push_back(g.Actual_Torque * 1.21 / 1000);
         }
         return result;
     }
-    static vector<float> getVecs(Driver &d, const vector<DFS> &getData) {
+    static vector<float> getVecs(const Driver &d, const vector<DFS> &getData) {
         vector<float> result{};
         int i{};
         for (auto g: getData) {
