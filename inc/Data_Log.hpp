@@ -30,9 +30,9 @@ public:
                   <<"-"<<systime.wMinute;
         fstream fp,fv,fm;
         string file_address="../data/";
-        string file_position = file_address+file_name.str()+" angles";
-        string file_vec =file_address+file_name.str()+" vecs";
-        string file_moments = file_address+file_name.str()+" moments";
+        string file_position = file_address+file_name.str()+" angles.txt";
+        string file_vec =file_address+file_name.str()+" vecs.txt";
+        string file_moments = file_address+file_name.str()+" moments.txt";
         fp.open(file_position,ios::out);
         fv.open(file_vec,ios::out);
         fm.open(file_moments,ios::out);
