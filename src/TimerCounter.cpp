@@ -14,17 +14,17 @@
 using namespace std;
 
 TimerCounter::TimerCounter() {
-    QueryPerformanceFrequency(&freq); // 锟斤拷取锟斤拷锟斤拷CPU时锟斤拷频锟斤拷
+    QueryPerformanceFrequency(&freq); // 获取CPU时钟
 }
 
 // TimerCounter::~TimerCounter()
 //     = default;
 void TimerCounter::Start() {
-    QueryPerformanceCounter(&startCount); // 锟斤拷始锟斤拷时
+    QueryPerformanceCounter(&startCount); // 计数
 }
 
 void TimerCounter::Stop() {
-    QueryPerformanceCounter(&endCount); // 停止锟斤拷时
+    QueryPerformanceCounter(&endCount); // 停止计数
 
-    dbTime = ((double) endCount.QuadPart - (double) startCount.QuadPart) / (double) freq.QuadPart; // 锟斤拷取时锟斤拷锟�
+    dbTime = ((double) endCount.QuadPart - (double) startCount.QuadPart) / (double) freq.QuadPart; // 计时
 }
