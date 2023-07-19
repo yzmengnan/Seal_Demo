@@ -34,10 +34,12 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         }
         if (state == servoNUMs) {
             cout << "All servo has been enabled!" << endl;
+            //需要更新当前控制字的引用
             for (auto &child: SendData) {
                 child.Control_Word |= 0x000f;
             }
             state = 0;
+            enableFlag = true;
             return 0;
         }
         if (error_code < 0) {
@@ -133,23 +135,29 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
 }
 
 auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
-    if (*cyclicFlag) {
-        this->servoFinishCS();
+    if (enableFlag) {
+        if (*cyclicFlag) {
+            this->servoFinishCS();
+        }
+        servoBreak(false);
+        pp_Flag = false;
+        cst_Flag = false;
+        csp_Flag = false;
+        for (auto &child_servo: SendData) {
+            child_servo.Mode_of_Operation = 1;
+            child_servo.Control_Word = 0;
+        }
+        error_code = p_ads->set(SendData);
+        if (error_code < 0) {
+            cout << "Servo Operation disabled failure !!" << std::endl;
+            cout << "Extreme Warning! Please Shut Down the Power Immediately!!!" << endl;
+            return error_code;
+        }
+        std::cout << "All Servos Operation disabled!" << std::endl;
+        enableFlag = false;
     }
-    servoBreak(false);
-    pp_Flag = false;
-    for (auto &child_servo: SendData) {
-        child_servo.Mode_of_Operation = 1;
-        child_servo.Control_Word = 0;
+    else{
     }
-    error_code = p_ads->set(SendData);
-    if (error_code < 0) {
-        cout << "Servo Operation disabled failure !!" << std::endl;
-        cout << "Extreme Warning! Please Shut Down the Power Immediately!!!" << endl;
-        return error_code;
-    }
-    std::cout << "All Servos Operation disabled!" << std::endl;
-    enableFlag = false;
     return 0;
 }
 /*
@@ -157,8 +165,8 @@ auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
  */
 auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int {
     //若伺服未使能
-    if(!enableFlag){
-        cout<<"禁止！请上使能！"<<endl;
+    if (!enableFlag) {
+        cout << "禁止！请上使能！" << endl;
         return -2999;
     }
     // 若此时伺服未设置PP模式
@@ -278,22 +286,20 @@ auto Driver::servoBreak(const bool &state) -> int {
  * @param GetData
  * @return
  */
-auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData)->int {
+auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
     //若伺服未使能
-    if(!enableFlag){
-        cout<<"禁止！请先上使能！"<<endl;
+    if (!enableFlag) {
+        cout << "禁止！请先上使能！" << endl;
     }
     //如果CST模式已经进入，则直接退出
     if (cst_Flag) {
         cout << "CST MODE has been running!" << endl;
         return 0;
-    }
-    else if(csp_Flag||pp_Flag||enableFlag){
-        cout<<"禁止！ 请下使能后再切换模式！"<<endl;
+    } else if (csp_Flag || pp_Flag || enableFlag) {
+        cout << "禁止！ 请下使能后再切换模式！" << endl;
         vector<DTS> temp(servoNUMs);
         this->servoDisable(temp);
-    }
-    else {
+    } else {
         for (auto &child: SendData) {
             child.Mode_of_Operation = 10;
             child.Max_Torque = 1500;
@@ -332,10 +338,10 @@ auto Driver::servoCST(vector<DTS> &SendData, vector<DFS> &GetData)->int {
  * @param GetData
  * @return
  */
-auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData)->int{
+auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
     //如果未上使能
-    if(!enableFlag){
-        cout<<"禁止！请先上使能！"<<endl;
+    if (!enableFlag) {
+        cout << "禁止！请先上使能！" << endl;
     }
     //如果CSP模式已经进入，则直接退出
     if (csp_Flag) {
