@@ -4,13 +4,16 @@
 
 #ifndef SEAL_DEMO_MULTI_PROCESS_H
 #define SEAL_DEMO_MULTI_PROCESS_H
-#include "windows.h"
 #include "iostream"
+#include "windows.h"
 using namespace std;
 class Multi_Process {
 public:
     Multi_Process(){
         cout<<"Mulit_Process Class built!"<<endl;
+    }
+    ~Multi_Process(){
+
     }
     PROCESS_INFORMATION safety_monitor_build(const string& name);
     PROCESS_INFORMATION safety_monitor_build();
