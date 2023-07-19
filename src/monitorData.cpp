@@ -3,18 +3,18 @@
  * @Date: 2023-02-28 16:43:54
  * @LastEditors: YangQ
  * @LastEditTime: 2023-03-08 11:10:46
- * @FilePath: \Demo0\SRC\MONITOR.cpp
+ * @FilePath: \Demo0\SRC\monitorData.cpp
  * @Description:
  *
  * Copyright (c) 2023 by YangQ, All Rights Reserved.
  */
-#include "MONITOR.h"
+#include "monitorData.h"
 #include "motionDataTransform.hpp"
 #include <sstream>
 #include <string>
-void MONITOR::print_info(Driver d, const string &name) {
+
+void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
     bool enableFlag = true;
-    vector<DFS> GetData(servoNUMs);
     SetConsoleOutputCP(CP_UTF8);
     cout << "创建管道！" << endl;
     SECURITY_ATTRIBUTES saAttr;
@@ -45,19 +45,22 @@ void MONITOR::print_info(Driver d, const string &name) {
     cout << "监视器开启！" << endl;
     DWORD len;
     while (enableFlag) {
-        auto servoData_success = d.GetDataUpdate(GetData);
-        if (servoData_success < 0) {
-            cout << "Get Monitor Data error! Ads error: " << servoData_success << endl;
-            ExitProcess(1);
-        }
+        //        更新:使用MotionV1版本内的MotGetData源
+
+        //        vector<DFS> GetData(servoNUMs);
+        //        auto servoData_success = m1.GetDataUpdate(GetData);
+        //        if (servoData_success < 0) {
+        //            cout << "Get Monitor Data error! Ads error: " << servoData_success << endl;
+        //            ExitProcess(1);
+        //        }
         auto now = std::chrono::system_clock::now();
         //通过不同精度获取相差的毫秒数
         uint64_t dis_millseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() -
-                                   std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() *1000;
+                                   std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count() * 1000;
         time_t tt = std::chrono::system_clock::to_time_t(now);
         auto time_tm = localtime(&tt);
         char strTime[25] = {};
-        sprintf(strTime, "%d-%02d-%02d %02d:%02d:%02d %03d", time_tm->tm_year + 1900,
+        sprintf(strTime, "%m1-%02d-%02d %02d:%02d:%02d %03d", time_tm->tm_year + 1900,
                 time_tm->tm_mon + 1, time_tm->tm_mday, time_tm->tm_hour,
                 time_tm->tm_min, time_tm->tm_sec, (int) dis_millseconds);
         ostringstream message;
@@ -69,9 +72,9 @@ void MONITOR::print_info(Driver d, const string &name) {
                 s = " " + s;
             return s;
         };
-        vector<vector<float>> data{MDT::getAngles(d, GetData),
-                                   MDT::getVecs(d, GetData),
-                                   MDT::getMoments(d, GetData)};
+        vector<vector<float>> data{MDT::getAngles(m1, m1.MotGetData),
+                                   MDT::getVecs(m1, m1.MotGetData),
+                                   MDT::getMoments(m1, m1.MotGetData)};
         vector<string> keys{"angles: ", "vecs: ", "moments: "};
         for (int i = 0; i < 3; i++) {
             message << keys[i];
@@ -82,7 +85,7 @@ void MONITOR::print_info(Driver d, const string &name) {
         }
         auto message_data = message.str();
         WriteFile(handle_write, message_data.data(), message_data.size(), &len, NULL);
-        this_thread::sleep_for(chrono::milliseconds(10));
+        this_thread::sleep_for(chrono::milliseconds(100));
     }
     cout << "后台线程数据显示进程启动失败！" << endl;
 }
