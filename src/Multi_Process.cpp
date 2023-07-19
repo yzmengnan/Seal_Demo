@@ -30,9 +30,6 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build() {
     return pi;
 }
 int Multi_Process::processDelete(PROCESS_INFORMATION &pi) {
-    // Close process and thread handles.
-    //    CloseHandle(pi.hProcess);
-    //    CloseHandle(pi.hThread);
     return (TerminateProcess(pi.hProcess,0));
 }
 PROCESS_INFORMATION Multi_Process::safety_monitor_build(const string& name) {
@@ -58,6 +55,7 @@ PROCESS_INFORMATION Multi_Process::safety_monitor_build(const string& name) {
         return pi;
     }
     cout<<"SAFETY PROCESS START!"<<endl;
+    // Close process and thread handles.
     return pi;
 }
 int Multi_Process::monitor(const string& name,HANDLE&handle_read) {
@@ -90,5 +88,8 @@ int Multi_Process::monitor(const string& name,HANDLE&handle_read) {
         cout<<"monitor进程创建成功！ "<<endl;
 //        processDelete(pi);
     }
+    // Close process and thread handles.
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
     return 0;
 }
