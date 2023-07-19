@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
             break;
         }
         cout <<buf << endl;
-        Sleep(10);
+        Sleep(5);
     }
     cout << "finish reading!" << endl;
     freopen("CON", "r", stdin);    // 重定向输入,否则system("pause")会无效
