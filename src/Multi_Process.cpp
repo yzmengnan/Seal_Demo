@@ -74,7 +74,7 @@ int Multi_Process::data_monitor(const string& name,HANDLE&handle_read) {
                              NULL,
                              NULL,
                              TRUE,
-                             CREATE_NEW_CONSOLE,
+                             CREATE_NEW_CONSOLE|CREATE_NEW_PROCESS_GROUP,
                              NULL,
                              NULL,
                              &si,
