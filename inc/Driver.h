@@ -4,9 +4,9 @@
 #pragma once
 
 #include "DATA_STRUCT.h"
-#include "MONITOR.h"
 #include "Tc_Ads.h"
 #include "TimerCounter.h"
+#include "monitorData.h"
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -182,10 +182,9 @@ public:
     vector<DTS> getSendData() {
         return this->MotSendData;
     }
-
+    vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
 private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
-    vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
     vector<DTS> &gearRatio_Scalar(initializer_list<float> args);
     int sync_rpm{50};
 };
