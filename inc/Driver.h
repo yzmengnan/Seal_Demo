@@ -72,13 +72,12 @@ public:
     void TestBREAK(const bool &state) {
         servoBreak(state);
     }
-
+    bool enableFlag = false;
 private:
     auto servoBreak(const bool &state) -> int;
     bool pp_Flag = false; //=1表示pp就位，=0表示未就位
     bool cst_Flag = false;// 1 ready, 0 not ready
     bool csp_Flag = false;// 1 ready, 0 not ready
-    bool enableFlag = false;
     shared_ptr<bool> cyclicFlag = make_shared<bool>(false);
     pTc_Ads p_ads = nullptr;
     int error_code = 0;
