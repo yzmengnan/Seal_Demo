@@ -39,18 +39,18 @@ int main() {
 
     //main actions!
     ptr_dev->Enable();
-//    ptr_dev->setProfileVelocity(30/10);
-    string m;
+    ptr_dev->setProfileVelocity(1);
+    int m;
     cin>>m;
-    while(true) {
-        ptr_dev->Write('1', 5.0f);
+    while(m>0) {
+        ptr_dev->Write('0', 1.0f);
         this_thread::sleep_for(chrono::seconds(5));
-        ptr_dev->setSyncrpm(10);
-        ptr_dev->Write('1', 0.0f);
+//        ptr_dev->setSyncrpm(10);
+        ptr_dev->Write('0', 0.0f);
         this_thread::sleep_for(chrono::seconds(5));
+        m--;
     }
     ptr_dev->Disable();
-
     //kill safety process
     if (!(p.processDelete(pi))) {
         cout << "Error kill safety process" << endl;
