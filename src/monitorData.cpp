@@ -60,7 +60,7 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         time_t tt = std::chrono::system_clock::to_time_t(now);
         auto time_tm = localtime(&tt);
         char strTime[25] = {};
-        sprintf(strTime, "%m1-%02d-%02d %02d:%02d:%02d %03d", time_tm->tm_year + 1900,
+        sprintf(strTime, "%02d-%02d %02d:%02d:%02d %03d",
                 time_tm->tm_mon + 1, time_tm->tm_mday, time_tm->tm_hour,
                 time_tm->tm_min, time_tm->tm_sec, (int) dis_millseconds);
         ostringstream message;
