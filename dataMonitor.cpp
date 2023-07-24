@@ -2,8 +2,9 @@
 // Created by 91418 on 2023/7/5.
 //
 // main.cpp
+#include "DATA_STRUCT.h"
+#include "iostream"
 #include <windows.h>
-#include"iostream"
 #define buffsize 4096
 using namespace std;
 
@@ -28,7 +29,7 @@ int main(int argc, char* argv[])
             break;
         }
         cout <<buf << endl;
-        Sleep(100);
+        Sleep(1000/MONITOR_Hz);
     }
     cout << "finish reading!" << endl;
     freopen("CON", "r", stdin);    // 重定向输入,否则system("pause")会无效
