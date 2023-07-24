@@ -13,9 +13,10 @@
 #include <Windows.h>
 #include <cstdint>
 #include<vector>
-#define DTS_SIZE 22
+#define DTS_SIZE 24
 #define DFS_SIZE 20
-#define servoNUMs 1
+#define servoNUMs 3
+#define MONITOR_Hz 20
 static std::vector<int32_t> pulse_offset{-382944720,-506320482,42662099};
 
 using DTS = struct Data_To_Servo {
@@ -26,6 +27,7 @@ using DTS = struct Data_To_Servo {
     INT8 Mode_of_Operation = 1;
     INT16 Target_Torque = 0;
     UINT16 Max_Torque = 1500;
+    UINT16 Place_Holder=0;
 };
 using pDTS = DTS *;
 
