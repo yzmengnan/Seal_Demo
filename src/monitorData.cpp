@@ -68,7 +68,7 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         auto fadd_space = [](float data) {
             string s = to_string(data);
             s = s.substr(0, s.find('.') + 4);
-            while (s.size() < 6)
+            while (s.size() < 8)
                 s = " " + s;
             return s;
         };
@@ -79,13 +79,15 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         for (int i = 0; i < 3; i++) {
             message << keys[i];
             for (int j = 0; j < servoNUMs; j++) {
-                message << fadd_space(data[i][j]);
+                message<<fadd_space(data[i][j]);
+                if(j!=servoNUMs-1)
+                message <<",";
             }
-            message << " ";
+            message<<" ";
         }
         auto message_data = message.str();
         WriteFile(handle_write, message_data.data(), message_data.size(), &len, NULL);
-        this_thread::sleep_for(chrono::milliseconds(100));
+        this_thread::sleep_for(chrono::milliseconds(1000/MONITOR_Hz));
     }
     cout << "后台线程数据显示进程启动失败！" << endl;
 }
