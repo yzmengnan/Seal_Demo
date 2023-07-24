@@ -39,14 +39,14 @@ int main() {
 
     //main actions!
     ptr_dev->Enable();
-    ptr_dev->setProfileVelocity(1);
     int counts;
     cin >> counts;
     while (counts > 0) {
-        ptr_dev->Write('0', 1.0f);
-        this_thread::sleep_for(chrono::milliseconds (2000));
-        //        ptr_dev->setSyncrpm(10);
-        ptr_dev->Write('0', 0.0f);
+        ptr_dev->setProfileVelocity(5.0f,8.0f,10.3f);
+        ptr_dev->Write('0', 30.0f,10.3f,10.5f);
+        this_thread::sleep_for(chrono::milliseconds(7000));
+        ptr_dev->setSyncrpm(3000);
+        ptr_dev->Write('1', 0.0f,0.0f,0.0f);
         this_thread::sleep_for(chrono::milliseconds(2000));
         counts--;
         cout << "Remaining: " << counts << endl;
