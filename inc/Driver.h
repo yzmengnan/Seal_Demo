@@ -139,7 +139,7 @@ public:
             uint32_t maxDelta = *max_element(Delta.begin(), Delta.end());
             //calculate and update each joint`s velocity
             for (int vec_index = 0; vec_index < servoNUMs; vec_index++) {
-                MotSendData[vec_index].Profile_Velocity = sync_rpm * ((float) (Delta[vec_index] / maxDelta)) * this->_driver_gearRatioScalar[vec_index] / 6;
+                MotSendData[vec_index].Profile_Velocity = sync_rpm * (float)Delta[vec_index]/maxDelta * this->_driver_gearRatioScalar[vec_index] / 6;
                 MotSendData[vec_index].Max_Velocity = 3000;
             }
             auto err = servoPP0(MotSendData, MotGetData);
