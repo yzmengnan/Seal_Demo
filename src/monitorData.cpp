@@ -41,9 +41,10 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         enableFlag = false;
         cout << "监视进程创建失败！" << endl;
     }
-    this_thread::sleep_for(chrono::seconds(2));
+    this_thread::sleep_for(chrono::milliseconds (2000));
     cout << "监视器开启！" << endl;
     DWORD len;
+    ostringstream message;
     while (enableFlag) {
         //        更新:使用MotionV1版本内的MotGetData源
 
@@ -63,7 +64,6 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         sprintf(strTime, "%02d-%02d %02d:%02d:%02d %03d",
                 time_tm->tm_mon + 1, time_tm->tm_mday, time_tm->tm_hour,
                 time_tm->tm_min, time_tm->tm_sec, (int) dis_millseconds);
-        ostringstream message;
         message << "[" << string(strTime) << "]";
         auto fadd_space = [](float data) {
             string s = to_string(data);
@@ -88,6 +88,7 @@ void monitorData::sendMessage(const MotionV1 &m1, const string &name) {
         auto message_data = message.str();
         WriteFile(handle_write, message_data.data(), message_data.size(), &len, NULL);
         this_thread::sleep_for(chrono::milliseconds(1000/MONITOR_Hz));
+        message.str(" ");
     }
     cout << "后台线程数据显示进程启动失败！" << endl;
 }
