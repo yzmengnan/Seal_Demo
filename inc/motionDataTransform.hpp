@@ -26,6 +26,9 @@ public:
     static void fromAnglesToPulses(const Driver &d, const vector<float> &angles, vector<DTS> &SendData) {
         int i{};
         for (auto &s: SendData) {
+            if(i>=angles.size()){
+                break;
+            }
             s.Target_Pos = (angles[i]) * d._driver_gearRatioScalar[i] - pulse_offset[i];
             i++;
         }
