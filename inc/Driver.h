@@ -122,6 +122,10 @@ public:
      * @return
      */
     int Write(T operationMode = '0', T2... args) {
+        //update the actual position to the command first
+        for(int i{};i<servoNUMs;i++){
+            MotSendData[i].Target_Pos = MotGetData[i].Actual_Pos;
+        }
         //update target position with gearRatio_Scalar anyway!
         MotSendData = gearRatio_Scalar({args...});
         if (operationMode == '0') {
