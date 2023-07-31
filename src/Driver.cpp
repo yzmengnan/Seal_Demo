@@ -432,8 +432,7 @@ vector<DTS> &MotionV1::gearRatio_Scalar(initializer_list<float> args) {
     for (auto index = args.begin(); index != args.end(); index++, i++) {
         if (i >= servoNUMs) {
             // modify servo send data
-            MDT::fromAnglesToPulses(*this, angles, this->MotSendData);
-            return MotSendData;
+            break;
         }
         angles.push_back(*index);
     }
