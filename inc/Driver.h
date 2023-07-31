@@ -17,10 +17,11 @@
 #include <vector>
 using namespace std;
 extern mutex th_mutex;
-#define angles2Pulses 8388608/360
+#define angles2Pulses 8388608 / 360
 using sd = class Driver {
 public:
-    vector<float> _driver_gearRatioScalar{vector<float>{181.22*angles2Pulses, 144.9 * 5 / 3*angles2Pulses, 33.0 * 5 / 3*angles2Pulses}};
+    vector<float> _driver_gearRatioScalar{vector<float>{181.22 * angles2Pulses, 144.9 * 5 / 3 * angles2Pulses, 33.0 * 5 / 3 * angles2Pulses}};
+
 public:
     Driver(Tc_Ads &ads_handle);
     auto servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> int;
@@ -73,6 +74,7 @@ public:
         servoBreak(state);
     }
     bool enableFlag = false;
+
 private:
     auto servoBreak(const bool &state) -> int;
     bool pp_Flag = false; //=1表示pp就位，=0表示未就位
@@ -123,7 +125,7 @@ public:
      */
     int Write(T operationMode = '0', T2... args) {
         //update the actual position to the command first
-        for(int i{};i<servoNUMs;i++){
+        for (int i{}; i < servoNUMs; i++) {
             MotSendData[i].Target_Pos = MotGetData[i].Actual_Pos;
         }
         //update target position with gearRatio_Scalar anyway!
@@ -138,12 +140,12 @@ public:
         } else if (operationMode == '1') {
             vector<uint32_t> Delta{};
             for (int i = 0; i < servoNUMs; i++) {
-                Delta.push_back(abs(MotSendData[i].Target_Pos - (MotGetData[i].Actual_Pos+pulse_offset[i])));
+                Delta.push_back(abs(MotSendData[i].Target_Pos - MotGetData[i].Actual_Pos));
             }
             uint32_t maxDelta = *max_element(Delta.begin(), Delta.end());
             //calculate and update each joint`s velocity
             for (int vec_index = 0; vec_index < servoNUMs; vec_index++) {
-                MotSendData[vec_index].Profile_Velocity = sync_rpm * (float)Delta[vec_index]/maxDelta * this->_driver_gearRatioScalar[vec_index] / 6;
+                MotSendData[vec_index].Profile_Velocity = sync_rpm * (float) Delta[vec_index] / maxDelta * 8388608 / 60;
                 MotSendData[vec_index].Max_Velocity = 3000;
             }
             auto err = servoPP0(MotSendData, MotGetData);
@@ -188,6 +190,7 @@ public:
         return this->MotSendData;
     }
     vector<DFS> MotGetData{vector<DFS>(servoNUMs)};
+
 private:
     vector<DTS> MotSendData{vector<DTS>(servoNUMs)};
     vector<DTS> &gearRatio_Scalar(initializer_list<float> args);
