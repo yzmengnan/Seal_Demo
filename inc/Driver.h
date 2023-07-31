@@ -166,7 +166,8 @@ public:
         }
         this->Driver::setProfileVelocity(dps, this->MotSendData);
     }
-    ~MotionV1() final;
+    int driver_errcode{};
+    ~MotionV1();
     /*!
      * @Description 注意，设置同步速度时，考虑不同轴减速比不同，无法定义同步转速，
      *              因此选取单位为rpm，表达最高轴的伺服轴输出转速
