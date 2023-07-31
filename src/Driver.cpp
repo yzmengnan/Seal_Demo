@@ -27,6 +27,9 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
     for (int try_count = 0; try_count < 3; try_count++) {
         uint8_t state = 0;
         error_code = p_ads->get(GetData);
+        if (error_code < 0) {
+            cout << "SERVO ENABLE: Get Data Error:" << error_code << endl;
+        }
         Sleep(10);
         //first check ,if servo is enabled, quit!
         for (auto child: GetData) {
@@ -42,9 +45,6 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
             enableFlag = true;
             return 0;
         }
-        if (error_code < 0) {
-            cout << "SERVO ENABLE: Get Data Error:" << error_code << endl;
-        }
         for (DFS child_servo: GetData) {
             state += ((child_servo.Status_Word &= 0x40) == 0x40);
         }
@@ -59,7 +59,7 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
             child_servo.Control_Word = 0x0006;
         }
         error_code = p_ads->set(SendData);
-        Sleep(10);
+        Sleep(50);
         if (error_code < 0) {
             cout << "SERVO ENABLE: Set Data Error:" << error_code << endl;
         }
@@ -82,12 +82,12 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
             child_servo.Control_Word = 0x0007;
         }
         p_ads->set(SendData);
-        Sleep(10);
+        Sleep(100);
         if (error_code < 0) {
             cout << "SERVO ENABLE: Set Data Error:" << error_code << endl;
         }
         error_code = p_ads->get(GetData);
-        Sleep(100);
+        Sleep(10);
         if (error_code < 0) {
             cout << "SERVO ENABLE: Get Data Error:" << error_code << endl;
         }
@@ -118,8 +118,8 @@ auto Driver::servoEnable(std::vector<DTS> &SendData, std::vector<DFS> &GetData) 
         }
         if (state == servoNUMs) {
             std::cout << "All Servos Operation enabled!" << std::endl;
-            this_thread::sleep_for(chrono::milliseconds(120));
             servoBreak(true);
+            this_thread::sleep_for(chrono::milliseconds(120));
             state = 0;
             enableFlag = true;
             return 0;
@@ -155,8 +155,13 @@ auto Driver::servoDisable(std::vector<DTS> &SendData) -> int {
         }
         std::cout << "All Servos Operation disabled!" << std::endl;
         enableFlag = false;
-    }
-    else{
+    } else {
+        servoBreak(false);
+        for (auto &child_servo: SendData) {
+            child_servo.Mode_of_Operation = 1;
+            child_servo.Control_Word = 0;
+        }
+        error_code = p_ads->set(SendData);
     }
     return 0;
 }
@@ -201,7 +206,6 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
 
     //伺服已设置为PP模式
     th_mutex.lock();
-
     // 更新607Ah（Target Position）的值
     error_code = p_ads->set(SendData);
     th_mutex.unlock();
@@ -222,7 +226,7 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
     //标志位指针
     shared_ptr<bool> servoLag_flag = make_shared<bool>(true);
     auto th = [servoLag_flag] {
-        this_thread::sleep_for(chrono::milliseconds(20));
+        this_thread::sleep_for(chrono::milliseconds(40));
         *servoLag_flag = false;
     };
 
@@ -270,11 +274,18 @@ auto Driver::servoPP0(std::vector<DTS> &SendData, std::vector<DFS> &GetData) -> 
  * @return 0 if set success
  */
 auto Driver::servoBreak(const bool &state) -> int {
-    int break_state[servoNUMs] = {};
-    for (auto &b: break_state) {
-        b = state;
+    //    int break_state[servoNUMs] = {};
+    //    for (auto &b: break_state) {
+    //        b = state;
+    //    }
+    //
+    int break_state{};
+    if (state) {
+        for (int i = 0; i < servoNUMs; i++) {
+            break_state |= 0b1 << i;
+        }
     }
-    auto nErr = AdsSyncWriteReq(p_ads->pAddr, OUTPUT_BASE, BREAK_OFFSET, 4 * servoNUMs, break_state);
+    auto nErr = AdsSyncWriteReq(p_ads->pAddr, OUTPUT_BASE, BREAK_OFFSET, 4 * servoNUMs, &break_state);
     if (nErr) {
         std::cout << "Ads set error: " << nErr << endl;
     }
@@ -383,22 +394,22 @@ auto Driver::servoCSP(vector<DTS> &SendData, vector<DFS> &GetData) -> int {
     *cyclicFlag = true;
     thread t(&Driver::f_Cyclic, *this, ref(SendData));
     t.detach();
-    return 0;
+    return error_code;
 }
-MotionV1::MotionV1(Tc_Ads &ads_handle) : Driver(ads_handle) {
+MotionV1::MotionV1(Tc_Ads &ads_handle) : Driver{ads_handle} {
     cout << "MotionV1 control module built!" << endl;
     auto dataUpdating_MOTIONV1 = [&]() {
         while (true) {
-            auto err = this->GetDataUpdate(MotGetData);
-            if (err < 0) {
-                cout << "Error updating servo data error in MotionV1 " << err << endl;
+            driver_errcode = this->GetDataUpdate(MotGetData);
+            if (driver_errcode < 0) {
+                cout << "Error updating servo data error in MotionV1 err:  " << driver_errcode << endl;
                 break;
             }
             this_thread::sleep_for(chrono::milliseconds(1));
         }
     };
-    thread t(dataUpdating_MOTIONV1);
-    t.detach();
+    thread t_Motion_V1(dataUpdating_MOTIONV1);
+    t_Motion_V1.detach();
     cout << "MotionV1 is updating the servo data background!" << endl;
 }
 int MotionV1::Enable() {
@@ -406,21 +417,24 @@ int MotionV1::Enable() {
     if (err < 0) {
         cout << "Error: Enable the Drive : " << err << endl;
     }
-    return 0;
+    return err;
 }
 int MotionV1::Disable() {
     auto err = servoDisable(MotSendData);
     if (err < 0) {
         cout << "Error: Enable the Drive : " << err << endl;
     }
-    return 0;
+    return err;
 }
 vector<DTS> &MotionV1::gearRatio_Scalar(initializer_list<float> args) {
     char i{};
     vector<float> angles;
     for (auto index = args.begin(); index != args.end(); index++, i++) {
-        if (i >= servoNUMs)
+        if (i >= servoNUMs) {
+            // modify servo send data
+            MDT::fromAnglesToPulses(*this, angles, this->MotSendData);
             return MotSendData;
+        }
         angles.push_back(*index);
     }
     MDT::fromAnglesToPulses(*this, angles, this->MotSendData);
