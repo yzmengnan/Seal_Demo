@@ -22,7 +22,7 @@ static std::vector<int32_t> pulse_offset{-382944720,-506320482,42662099};
 using DTS = struct Data_To_Servo {
     UINT16 Control_Word = 0;
     INT32 Target_Pos = 0;
-    UINT32 Profile_Velocity = 0xffffffff;
+    UINT32 Profile_Velocity = 0x00000000;
     UINT32 Max_Velocity = 3000; // rpm
     INT8 Mode_of_Operation = 1;
     INT16 Target_Torque = 0;
