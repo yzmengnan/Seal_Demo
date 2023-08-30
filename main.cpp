@@ -10,7 +10,7 @@ using namespace std;
 void test();
 void breaktest(MotionV1 &m);
 //#define TEST
-
+//#define BREAK_TEST
 int main() {
     if (servoNUMs >= 4) {
         cout << "Error! Only support for debugging up to 3 axises!" << endl;
@@ -23,7 +23,9 @@ int main() {
     file_log fl;                              // file record
     auto ptr_dev = make_shared<MotionV1>(ads);//controller ptr
 
-
+#ifdef BREAK_TEST
+    breaktest(*ptr_dev);
+#endif
 #ifndef TEST
     // add safety program
     auto pi = p.safety_monitor_build("safe_program.exe");
@@ -38,16 +40,21 @@ int main() {
     this_thread::sleep_for(chrono::seconds(3));
 
     //main actions!
-    ptr_dev->Enable();
-    int counts;
+    int counts{};
+    cout<<"循环次数："<<endl;
     cin >> counts;
+    ptr_dev->Enable();
     while (counts > 0) {
-        ptr_dev->setProfileVelocity(5.0f,8.0f,10.3f);
-        ptr_dev->Write('0', 30.0f,10.3f,10.5f);
-        this_thread::sleep_for(chrono::milliseconds(7000));
-        ptr_dev->setSyncrpm(3000);
-        ptr_dev->Write('1', 0.0f,0.0f,0.0f);
-        this_thread::sleep_for(chrono::milliseconds(2000));
+//        ptr_dev->setProfileVelocity(5.0f,3.0f,4.0f);
+        ptr_dev->setSyncrpm(2000);
+        ptr_dev->Write('1', 20.0f);
+        ptr_dev->cutToolOperation(1);
+        this_thread::sleep_for(chrono::milliseconds(15000));
+        ptr_dev->Write('1', 0.0f);
+        ptr_dev->cutToolOperation(2);
+        this_thread::sleep_for(chrono::milliseconds(15000));
+        ptr_dev->cutToolOperation(0);
+        this_thread::sleep_for(chrono::milliseconds(15000));
         counts--;
         cout << "Remaining: " << counts << endl;
     }
